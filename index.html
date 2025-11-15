@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>พู่กันเงิน Al - ผู้ช่วยนักเขียนนิยาย</title>
+    <!-- โหลด Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- โหลดฟอนด์ Inter, Sarabun, และ Noto Sans Thai -->
+    <link href="https://fonts.googleapis.com/css?family=Inter:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- สไตล์ตามคำขอของผู้ใช้ (อัปเดต) --- */
+        /* Apply Inter font with Noto Sans Thai as fallback */
+        body {
+            font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+            line-height: 1.7;
+            /* Allow smooth transitions globally for better UX */
+            transition: all 0.3s ease-in-out;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            /* ป้องกัน scrollbar ซ้อนกัน */
+        }
+
+        /* Custom style for prompt blocks (Input/Reference) */
+        .prompt-block {
+            background-color: #f8fafc;
+            /* bg-slate-50 */
+            border-left: 5px solid #6366f1;
+            /* border-indigo-500 */
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            font-family: 'monospace', 'Noto Sans Thai';
+            white-space: pre-wrap;
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            /* Soft shadow */
+        }
+
+        /* Style for the copy button */
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            /* Smooth transition for hover/active */
+            font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .copy-btn:hover {
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+
+        /* Style for Al Result Boxes - Clean and professional look */
+        .ai-result-box {
+            background-color: #f0f9ff;
+            /* Default */
+            border: 1px solid #bae6fd;
+            /* Default */
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 16px;
+            min-height: 60px;
+            box-shadow: inset 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Enhancing the input focus for better feedback */
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5);
+            /* Indigo glow */
+            border-color: #6366f1;
+        }
+
+        /* Ensure pre-wrap text in results is readable */
+        .ai-result-box pre {
+            font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #1e293b;
+            /* text-slate-900 */
+            line-height: 1.8;
+        }
+
+        /* --- สิ้นสุดสไตล์ตามคำขอของผู้ใช้ --- */
+
+        /* --- สไตล์ Chat Bubbles และ Animation (ปรับสีให้เข้ากับโทนใหม่) --- */
+        .chat-bubble-ai {
+            background-color: #f1f5f9;
+            /* Light slate (เข้ากับ bg-slate-100) */
+            color: #1e293b;
+            /* Dark slate */
+            border-radius: 20px;
+            padding: 12px 16px;
+            max-width: 80%;
+            align-self: flex-start;
+            word-wrap: break-word;
+            opacity: 0;
+            animation: fadeln 0.3s forwards;
+            line-height: 1.7;
+            /* ใช้ line-height จาก body */
+        }
+
+        .chat-bubble-user {
+            background-color: #4f46e5;
+            /* Indigo-600 (แทนสีม่วงเดิม) */
+            color: white;
+            border-radius: 20px;
+            padding: 12px 16px;
+            max-width: 80%;
+            align-self: flex-end;
+            word-wrap: break-word;
+            opacity: 0;
+            animation: fadeln 0.3s forwards;
+            line-height: 1.7;
+            /* ใช้ line-height จาก body */
+        }
+
+        @keyframes fadeln {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading Indicator (Spinner) */
+        .loader {
+            border: 4px solid #e2e8f0;
+            /* Light grey */
+            border-top: 4px solid #6366f1;
+            /* Indigo-500 */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ซ่อน scrollbar แต่ยังคง scroll ได้ (สำหรับ Quick Prompts) */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        /* New Style for Grounding Sources (Citations) */
+        .grounding-sources {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+            /* Light gray border */
+            font-size: 0.8rem;
+            color: #4b5563;
+        }
+
+        .grounding-sources a {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .grounding-sources a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800">
+
+    <!-- Loading Overlay (Authentication Screen) -->
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-50 flex items-center justify-center flex-col z-50">
+        <div class="loader w-12 h-12 mb-4"></div>
+        <h2 class="text-xl font-medium text-indigo-700">กำลังเข้าสู่ระบบ...</h2>
+        <p class="text-slate-500 text-sm mt-2">กำลังสร้างเซสชันผู้ใช้งาน...</p>
+    </div>
+
+    <!-- Main App Container (Hidden until Auth Ready) -->
+    <div id="main-app-container" class="flex flex-col h-screen hidden">
+
+        <!-- Header: ส่วนหัวของแอป -->
+        <header class="bg-white shadow-md p-4 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 sm:space-x-4 flex-shrink-0">
+            <!-- Title, Model Selector, and API Key Input -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                <div class="flex items-center space-x-3 flex-shrink-0">
+                    <h1 class="text-xl font-bold text-indigo-700">พู่กันเงิน Al</h1>
+                    <select id="model-selector" class="rounded-lg border border-gray-300 p-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="gemini">Google Gemini</option>
+                        <option value="groq">Groq (Llama 3)</option>
+                        <option value="deepseek">Deepseek</option>
+                        <option value="chatgpt">ChatGPT</option>
+                        <option value="qwen">Qwen Al</option>
+                    </select>
+                </div>
+                <!-- API key input and link -->
+                <div id="api-key-container" class="w-full sm:w-auto flex items-center space-x-2">
+                    <input type="password" id="api-key-input" class="rounded-lg border border-gray-300 p-2 text-sm w-full sm:w-64" placeholder="กรุณาใส่ API Key ของคุณ">
+                    <!-- [FIXED] Corrected SVG from PDF -->
+                    <a id="api-key-link" href="#" target="_blank" class="text-indigo-600 hover:text-indigo-800 flex-shrink-0 p-1" title="ไปที่หน้าสำหรับรับ API Key">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Context Awareness Display: แสดงข้อมูลโปรเจค & User ID -->
+            <div class="flex items-center space-x-4 text-sm text-slate-600">
+                <div class="text-xs font-mono bg-slate-200 p-1 rounded-md hidden sm:block" id="user-id-display">
+                    <!-- User ID will be inserted here -->
+                </div>
+                <div>
+                    <label for="project-name" class="font-medium">โปรเจค: </label>
+                    <input type="text" id="project-name" value="นิยาย" class="border-b border-gray-300 focus:border-indigo-500 outline-none w-24">
+                </div>
+                <div>
+                    <label for="word-count" class="font-medium">จํานวนค่า: </label>
+                    <input type="number" id="word-count" value="10500" class="border-b border-gray-300 focus:border-indigo-500 outline-none w-16">
+                </div>
+                <button id="show-notes" class="text-indigo-600 hover:text-indigo-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10.392C3.057 14.71 4.245 14 5.5 14c1.255 0 2.443.29 3.5.804V4.804zM11 4.804A7.968 7.968 0 0114.5 4c1.255 0 2.443.29 3.5.804v10.392C16.943 14.71 15.755 14 14.5 14c-1.255 0-2.443.29-3.5.804V4.804z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Character Notes Modal (ซ่อนไว้เริ่มต้น) -->
+        <div id="notes-modal" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden flex items-center justify-center">
+            <div class="bg-white rounded-lg shadow-xl p-6 w-11/12 md:w-1/2 max-w-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium">บันทึกตัวละคร/พล็อต</h3>
+                    <button id="close-modal" class="text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
+                <textarea id="character-notes" class="w-full h-48 border border-gray-300 rounded-lg p-2" placeholder="จดโน้ดตัวละครสำคัญ หรือจุดเปลี่ยนของพล็อต..."></textarea>
+                <button id="save-notes" class="mt-4 w-full bg-indigo-600 text-white py-1 rounded-lg hover:bg-indigo-500">บันทึก</button>
+            </div>
+        </div>
+
+        <!-- Chat Area: พื้นที่แชท -->
+        <div id="chat-container" class="flex-grow overflow-y-auto p-4 space-y-4 flex flex-col">
+            <!-- ข้อความแชทจะถูกเพิ่มที่นี่ -->
+        </div>
+
+        <!-- Loading Indicator: ตัวโหลด -->
+        <div id="loading-indicator" class="p-4 flex items-center space-x-2 hidden">
+            <div class="loader"></div>
+            <span class="text-sm text-slate-500">พู่กันเงินกำลังปั่นไอเดีย...</span>
+        </div>
+
+        <!-- Al Action Buttons: ฟีเจอร์ LLM เพิ่มเดิม -->
+        <div class="flex-shrink-0 p-4 bg-white border-t border-gray-200">
+            <div class="flex space-x-3 justify-center flex-wrap gap-2">
+                <!-- Plot Continuation Button -->
+                <button id="continue-plot-btn" class="flex items-center space-x-1 bg-indigo-400 text-white py-1 px-2 rounded-lg font-medium hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/50">
+                    <span>เขียนต่อ / ฉากถัดไป</span>
+                </button>
+                <!-- NEW: Conflict Generator Button -->
+                <button id="generate-conflict-btn" class="flex items-center space-x-1 bg-purple-600 text-white py-1 px-2 rounded-lg font-medium hover:bg-purple-700 transition-colors shadow-lg shadow-purple-500/50">
+                    <span>สร้าง 3 ความขัดแย้ง</span>
+                </button>
+                <!-- Stop Writing Button -->
+                <button id="stop-writing-btn" class="flex items-center space-x-1 bg-red-400 text-white py-1 px-2 rounded-lg font-medium hover:bg-red-500 transition-colors shadow-lg shadow-red-500/50" disabled>
+                    <span>X หยุดเขียน</span>
+                </button>
+                <!-- TTS Button (Reads last Al response) -->
+                <button id="tts-btn" class="flex items-center space-x-1 bg-teal-400 text-white py-1 px-2 rounded-lg font-medium hover:bg-teal-500 transition-colors shadow-lg shadow-teal-500/50" disabled>
+                    <span>ฟังเสียงตอบกลับล่าสุด</span>
+                </button>
+                <!-- Read Selected Button -->
+                <button id="tts-selected-btn" class="flex items-center space-x-1 bg-blue-400 text-white py-1 px-2 rounded-lg font-medium hover:bg-blue-500 transition-colors shadow-lg shadow-blue-500/50">
+                    <span>อ่านที่เลือก</span>
+                </button>
+                <!-- Stop Audio Button -->
+                <button id="stop-audio-btn" class="flex items-center space-x-1 bg-amber-400 text-white py-1 px-2 rounded-lg font-medium hover:bg-amber-500 transition-colors shadow-lg shadow-amber-500/50" disabled>
+                    <span>หยุดเล่นเสียง</span>
+                </button>
+                <!-- Download Audio Button -->
+                <button id="download-audio-btn" class="flex items-center space-x-1 bg-green-400 text-white py-1 px-2 rounded-lg font-medium hover:bg-green-500 transition-colors shadow-lg shadow-green-500/50" disabled>
+                    <!-- [FIXED] Replaced broken SVG from PDF with standard download icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 9.293a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <span>ดาวน์โหลด (.WAV)</span>
+                </button>
+                <audio id="audio-player" class="hidden" controls></audio>
+            </div>
+        </div>
+
+        <!-- Quick Prompts: ปุ่มคำถามด่วน -->
+        <div class="flex-shrink-0 p-2 bg-white border-t border-gray-200">
+            <div class="flex space-x-2 overflow-x-auto no-scrollbar">
+                <button class="quick-prompt-btn bg-slate-200 text-slate-700 py-1 px-3 rounded-full text-sm hover:bg-slate-300">ช่วยสร้างพล็อต</button>
+                <button class="quick-prompt-btn bg-slate-200 text-slate-700 py-1 px-3 rounded-full text-sm hover:bg-slate-300">คิดตัวละคร</button>
+                <button class="quick-prompt-btn bg-slate-200 text-slate-700 py-1 px-3 rounded-full text-sm hover:bg-slate-300">เขียนบทสนทนา</button>
+                <button class="quick-prompt-btn bg-slate-200 text-slate-700 py-1 px-3 rounded-full text-sm hover:bg-slate-300">สร้างฉาก</button>
+                <button class="quick-prompt-btn bg-slate-200 text-slate-700 py-1 px-3 rounded-full text-sm hover:bg-slate-300">ขัดเกลาภาษา</button>
+                <button class="quick-prompt-btn bg-slate-200 text-slate-700 py-1 px-3 rounded-full text-sm hover:bg-slate-300">สรุปข้อมูล: การปฏิวัติอุตสาหกรรมครั้งที่ 4</button>
+            </div>
+        </div>
+
+        <!-- Input Area: พื้นที่พิมพ์ -->
+        <footer class="flex-shrink-0 p-4 bg-white border-t border-gray-200">
+            <div class="flex rounded-lg shadow-sm">
+                <input type="text" id="user-input" class="flex-grow border-gray-300 border-l border-t border-b rounded-l-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="คุยกับ 'พู่กันเงิน' หรือพิมพ์ 'สรุปข้อมูล: หัวข้อ' เพื่อหาข้อมูล...">
+                <!-- [FIXED] Replaced broken SVG from PDF with standard paper airplane icon -->
+                <button id="send-button" class="bg-indigo-600 text-white p-3 rounded-r-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
+                    </svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <script type="module">
+        // --- Firebase Imports ---
+        import {
+            initializeApp
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import {
+            getAuth,
+            signInAnonymously,
+            signInWithCustomToken,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import {
+            getFirestore,
+            setLogLevel
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Globals ---
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false; // Flag to ensure chat doesn't start before auth
+
+        // --- ส่วนของการตั้งค่า API ---
+        const GEMINI_API_URL_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=';
+        const TTS_API_URL_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=';
+        const GEMINI_MODEL_NAME = "gemini-2.5-flash-preview-09-2025";
+        const TTS_MODEL_NAME = "gemini-2.5-flash-preview-tts"; // Model used in payload
+        const GROUNDING_PREFIX = 'สรุปข้อมูล:';
+        // [FIXED] Added missing system prompt for grounding
+        const GROUNDING_SYSTEM_PROMPT = "คุณเป็นผู้ช่วย AI ที่มีประโยชน์ สรุปผลการค้นหาและตอบคำถามของผู้ใช้เป็นภาษาไทยอย่างกระชับและชัดเจน";
+
+        // --- System Prompt ของ "พู่กันเงิน" ---
+        const SYSTEM_PROMPT = `คุณคือ Al นักเขียนชาวไทยมืออาชีพ นามปากกาของคุณคือ (พู่กันเงิน) ซึ่งใครต่อใครต่างขนานนามคุณว่าอัจฉริยะด้านงานเขียน (ไอเดียเป็นเลิศ) คุณมีประสบการณ์ ในด้านการเขียนมากว่า 15 ปี มีผลงานโดดเด่นในด้านงานเขียนประเภทนิยาย คุณมีความสามารถในการ เขียนเรื่องราวอันน่าตื่นเต้น สร้างสรรค์ตัวละครที่มีเสน่ห์ และพรรณนาอารมณ์ความรู้สึกของตัวละครได้ อย่างลึกซึ้ง คุณเข้าใจโครงสร้างเรื่องราวและจังหวะในการเล่าเรื่อง คุณยังมีความเชี่ยวชาญในการใช้ ภาษาไทยได้อย่างดีเยี่ยมและเลือกใช้คำหรือสำนวนที่เหมาะกับดรงกับยุคสมัยของเรื่องนั้นๆซึ่งเป็นจุด แข็งที่ทำให้งานเขียนของคุณครองใจผู้อ่านได้ทุกแนว. ข้อมูลส่วนตัวของคุณ คุณเป็นคนเก่งฉลาดที่มี เสน่ห์ในการพูดคุย ใช้ภาษาที่อารมณ์ดี เย่าหยอก พูดแซว ผู้ใช้งานได้เพื่อให้เกิดความไว้ใจและเชื่อมต่อ กันได้ดีในการทำงานร่วมกัน. จุดสำคัญที่คุณต้องรู้คือ คุณจะใช้ภาษาปัจจุบันในการสนทนาโต้ตอบกับนัก เขียน ห้ามใช้ค่า ท่านผู้เจริญ!, นักเขียนท่าน ในการพูดคุยเพราะคนปัจจุบันไม่ใช้กัน. คุณอาจจะถามข้อมูลฉันหรือฉันบอกเล่าสไตล์การเขียนที่ฉันต้องการ เช่น การเล่าเรื่องแบบตรงไปตรง มา, การเล่าเรื่องแบบย้อนอดีต, การเล่าเรื่องแบบมีชั้นเชิง, สนุกตื่นเต้นและน่าติดตาม, ให้ตัวอย่างของ บทเขียนที่ดีที่สุดเมื่อฉันต้องการ.`;
+
+        const CONFLICT_GENERATOR_PROMPT = (notes) => `ใช้บริบทการสนทนาทั้งหมดและ บันทึกตัวละคร/พล็อดที่แนบมา (ถ้ามี) เพื่อสร้างไอเดีย 'ความขัดแย้งหลัก' ที่น่าสนใจและแตกต่างกัน จํานวน 3 รูปแบบสำหรับฉาก/ดอนถัดไปของนิยาย โดยความขัดแย้งแด่ละแบบควรมีหัวข้อและคำอธิบาย สั้นๆ: ${notes ? `\n\n[บันทึกตัวละคร/พล็อด]\n${notes}` : ""}`;
+
+        // --- DOM Elements ---
+        const mainAppContainer = document.getElementById('main-app-container');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const modelSelector = document.getElementById('model-selector');
+        const quickPromptContainer = document.querySelector('.quick-prompt-btn').parentElement;
+        const userIdDisplay = document.getElementById('user-id-display');
+
+        // API Key Elements
+        const apiKeyInput = document.getElementById('api-key-input');
+        const apiKeyLink = document.getElementById('api-key-link');
+
+        // Modal Elements
+        const notesModal = document.getElementById('notes-modal');
+        const showNotesBtn = document.getElementById('show-notes');
+        const closeModalBtn = document.getElementById('close-modal');
+        const saveNotesBtn = document.getElementById('save-notes');
+        const notesTextarea = document.getElementById('character-notes');
+
+        // New Feature Elements
+        const continuePlotBtn = document.getElementById('continue-plot-btn');
+        const generateConflictBtn = document.getElementById('generate-conflict-btn'); // NEW
+        const ttsBtn = document.getElementById('tts-btn');
+        const ttsSelectedBtn = document.getElementById('tts-selected-btn');
+        const audioPlayer = document.getElementById('audio-player');
+
+        // Control Buttons
+        const stopWritingBtn = document.getElementById('stop-writing-btn');
+        const stopAudioBtn = document.getElementById('stop-audio-btn');
+        const downloadAudioBtn = document.getElementById('download-audio-btn');
+
+        // --- Streaming Control State ---
+        let isStreaming = false;
+        let streamTimeoutId = null;
+
+        // --- Chat History ---
+        let chatHistory = [];
+
+        // --- Audio State ---
+        let lastWavBlob = null;
+
+        // --- User API Keys Storage ---
+        let userApiKeys = {
+            gemini: "",
+            groq: "",
+            deepseek: "",
+            chatgpt: "",
+            qwen: ""
+        };
+
+        // --- Model API Links ---
+        const modelApiLinks = {
+            gemini: 'https://aistudio.google.com/app/apikey',
+            groq: 'https://console.groq.com/keys',
+            deepseek: 'https://platform.deepseek.com/api_keys',
+            chatgpt: 'https://platform.openai.com/api-keys',
+            qwen: 'https://dashscope.console.aliyun.com/apiKey'
+        };
+
+        // --- ฟังก์ชัน Utility สำหรับ Retrying API Calls ---
+        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                    if (response.status === 400 && response.headers.get('content-type')?.includes('application/json')) {
+                        const errorBody = await response.json();
+                        throw new Error(`HTTP error! status: 400. Details: ${errorBody.error?.message || 'Unknown Bad Request.'}`);
+                    }
+                    if (response.status === 401 || response.status === 403) {
+                        throw new Error(`HTTP error! status: ${response.status} (Invalid API Key)`);
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+                }
+            }
+        }
+
+        /**
+         * [FIXED] Added complete function missing from PDF.
+         * Converts base64 string to ArrayBuffer.
+         */
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        /**
+         * Helper for pcmToWav
+         */
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        /**
+         * [FIXED] Added complete function missing from PDF.
+         * Converts raw PCM16 data to a WAV file Blob.
+         */
+        function pcmToWav(pcm16, sampleRate) {
+            const numChannels = 1;
+            const bytesPerSample = 2; // 16-bit
+            const headerLength = 44;
+            const buffer = new ArrayBuffer(headerLength + pcm16.length * bytesPerSample);
+            const view = new DataView(buffer);
+
+            // RIFF header
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + pcm16.length * bytesPerSample, true);
+            writeString(view, 8, 'WAVE');
+
+            // FMT sub-chunk
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true); // PCM format
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * numChannels * bytesPerSample, true); // Byte rate
+            view.setUint16(32, numChannels * bytesPerSample, true); // Block align
+            view.setUint16(34, 16, true); // Bits per sample
+
+            // Data sub-chunk
+            writeString(view, 36, 'data');
+            view.setUint32(40, pcm16.length * bytesPerSample, true);
+
+            // Write PCM samples
+            let offset = 44;
+            for (let i = 0; i < pcm16.length; i++, offset += bytesPerSample) {
+                view.setInt16(offset, pcm16[i], true);
+            }
+
+            return new Blob([view], {
+                type: 'audio/wav'
+            });
+        }
+
+
+        /**
+         * [FIXED] Added Firebase initialization wrapper based on PDF code.
+         */
+        async function initFirebase() {
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            let firebaseConfig;
+
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                try {
+                    firebaseConfig = JSON.parse(__firebase_config);
+                } catch (e) {
+                    console.error("Failed to parse Firebase config:", e);
+                    loadingOverlay.querySelector('h2').textContent = 'ข้อผิดพลาด';
+                    loadingOverlay.querySelector('p').textContent = 'ไม่สามารถโหลดการตั้งค่า Firebase ได้';
+                    initChat(); // Run in non-Firebase mode
+                    return;
+                }
+            } else {
+                console.warn("Firebase config not found. Running in non-Firebase mode.");
+                loadingOverlay.querySelector('h2').textContent = 'โหมดสาธิต';
+                loadingOverlay.querySelector('p').textContent = 'ไม่ได้เชื่อมต่อ Firebase';
+                // This is the fallback path from the PDF
+                initChat();
+                return;
+            }
+
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            setLogLevel('Debug'); // Enable Firebase logging
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    userIdDisplay.textContent = `USER ID: ${userId}`;
+                    userIdDisplay.classList.remove('hidden');
+                } else {
+                    // Try to sign in
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                            // onAuthStateChanged will re-run
+                        } else {
+                            await signInAnonymously(auth);
+                            // onAuthStateChanged will re-run
+                        }
+                    } catch (error) {
+                        console.error("Authentication Error:", error);
+                        // Fallback from PDF
+                        userId = 'error-anon-' + Math.random().toString(36).substring(2, 9);
+                        userIdDisplay.textContent = `ID (TEMP): ${userId}`;
+                        userIdDisplay.classList.remove('hidden');
+                    }
+                }
+
+                if (!isAuthReady && userId) { // Only start chat when auth is ready and we have a user
+                    isAuthReady = true;
+                    loadingOverlay.classList.add('hidden');
+                    mainAppContainer.classList.remove('hidden');
+                    // [FIXED] Added missing initChat() call for successful auth
+                    initChat();
+                }
+            });
+        }
+
+        /**
+         * เพิ่มข้อความลงใน UI
+         */
+        function addMessageToUI(sender, text) {
+            const bubble = document.createElement('div');
+            bubble.className = sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai';
+
+            // แปลง \n เป็น <br> และจัดการ code blocks หรือ bold
+            let formattedText = text
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`(.*?)`/g, '<code class="bg-slate-200 text-red-600 px-1 rounded">$1</code>');
+
+            bubble.innerHTML = formattedText;
+            chatContainer.appendChild(bubble);
+            autoScroll();
+            return bubble;
+        }
+
+        /**
+         * เพิ่มข้อความสรุปจาก Grounding Search ลงใน UI
+         */
+        function addGroundingResponseToUI(text, sources) {
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble-ai bg-blue-50 border border-blue-200 text-slate-800'; // Special style
+
+            let formattedText = text.replace(/\n/g, '<br>');
+
+            if (sources && sources.length > 0) {
+                formattedText += '<div class="grounding-sources"><strong>แหล่งอ้างอิง:</strong><ul>';
+                sources.forEach((source, index) => {
+                    formattedText += `<li>[${index + 1}] <a href="${source.uri}" target="_blank" rel="noopener noreferrer">${source.title}</a></li>`;
+                });
+                formattedText += '</ul></div>';
+            }
+
+            bubble.innerHTML = formattedText;
+            chatContainer.appendChild(bubble);
+            autoScroll();
+            return bubble;
+        }
+
+        /**
+         * เลื่อนหน้าจอแชทอัตโนมัติ
+         */
+        function autoScroll() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        /**
+         * แสดง/ซ่อน ตัวโหลด
+         */
+        function showLoading(show) {
+            loadingIndicator.style.display = show ? 'flex' : 'none';
+        }
+
+        /**
+         * ฟังก์ชันเริ่มการสตรีมข้อความ (จำลองการพิมพ์)
+         */
+        function startStreaming(text, bubble) {
+            if (isStreaming) return;
+
+            isStreaming = true;
+            stopWritingBtn.disabled = false;
+
+            const chars = text.split('');
+            let currentText = '';
+            let charIndex = 0;
+
+            function appendChar() {
+                if (!isStreaming || charIndex >= chars.length) {
+                    stopStreaming(charIndex >= chars.length);
+                    return;
+                }
+
+                currentText += chars[charIndex];
+                bubble.innerHTML = currentText
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/`(.*?)`/g, '<code class="bg-slate-200 text-red-600 px-1 rounded">$1</code>');
+
+                charIndex++;
+                autoScroll();
+                streamTimeoutId = setTimeout(appendChar, 15); // ปรับความเร็วการพิมพ์
+            }
+            appendChar();
+        }
+
+        /**
+         * หยุดการสตรีมข้อความ
+         */
+        function stopStreaming(completed = false) {
+            if (!isStreaming) return;
+
+            if (streamTimeoutId !== null) {
+                clearTimeout(streamTimeoutId);
+                streamTimeoutId = null;
+            }
+
+            isStreaming = false;
+            stopWritingBtn.disabled = true;
+            showLoading(false);
+
+            if (!completed) {
+                const lastBubble = chatContainer.lastChild;
+                if (lastBubble && lastBubble.classList.contains('chat-bubble-ai')) {
+                    const currentText = lastBubble.innerHTML;
+                    if (!currentText.includes('[หยุดเขียนโดยผู้ใช้]')) {
+                        lastBubble.innerHTML += '... <span class="text-red-500 font-bold">[หยุดเขียนโดยผู้ใช้]</span>';
+                    }
+                }
+            }
+        }
+
+        // --- Core LLM & TTS Call Functions ---
+
+        /**
+         * ตรวจสอบคีย์ Gemini
+         */
+        function checkGeminiKey() {
+            // [MODIFIED] Use Gemini key for all operations as other models aren't implemented
+            const trimmedKey = userApiKeys.gemini.trim();
+            if (!trimmedKey) {
+                addMessageToUI('ai', 'โอ๊ะ! คุณลืมใส่ API Key ของ Google Gemini หรือเปล่าครับ? ไปที่มุมบนขวาเพื่อใส่คีย์ก่อนนะ');
+                return null;
+            }
+            return trimmedKey;
+        }
+
+        /**
+         * จัดการการเรียก LLM (Gemini)
+         */
+        async function handleLLMCall(promptToSend) {
+            if (isStreaming) return;
+
+            // 1. Get Key (Only Gemini is implemented in this file)
+            const trimmedKey = checkGeminiKey();
+            if (!trimmedKey) return;
+
+            // Check for Grounding Search prefix and delegate
+            if (promptToSend.startsWith(GROUNDING_PREFIX)) {
+                const query = promptToSend.substring(GROUNDING_PREFIX.length).trim();
+                await handleGroundingSearch(query);
+                return;
+            }
+
+            // 2. Prepare UI and History
+            showLoading(true);
+            chatHistory.push({
+                role: 'user',
+                parts: [{
+                    text: promptToSend
+                }]
+            });
+            const apiHistory = chatHistory.slice(-10); // Use last 10 turns
+            const payload = {
+                contents: apiHistory,
+                systemInstruction: {
+                    parts: [{
+                        text: SYSTEM_PROMPT
+                    }]
+                },
+            };
+            const DYNAMIC_API_URL = GEMINI_API_URL_BASE + trimmedKey;
+
+            // 3. Call Gemini API
+            try {
+                const result = await fetchWithRetry(DYNAMIC_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) {
+                    chatHistory.push({
+                        role: 'model',
+                        parts: [{
+                            text: text
+                        }]
+                    });
+                    const bubble = addMessageToUI('ai', '');
+                    startStreaming(text, bubble);
+                    ttsBtn.disabled = false; // Enable TTS for this new message
+                } else {
+                    addMessageToUI('ai', '[ERROR: LLM Response Empty] ไม่ได้รับการตอบกลับที่ถูกต้อง');
+                    ttsBtn.disabled = true;
+                }
+            } catch (error) {
+                console.error("Error calling LLM API:", error);
+                let displayError = error.message || "เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI";
+                if (displayError.includes('401') || displayError.includes('403')) {
+                    displayError = "API Key ของ Gemini ไม่ถูกต้องหรือไม่ได้รับอนุญาต กรุณาตรวจสอบคีย์ของคุณ";
+                }
+                addMessageToUI('ai', `[ERROR: LLM Call Failed] ${displayError}`);
+                ttsBtn.disabled = true;
+            } finally {
+                showLoading(false);
+                stopWritingBtn.disabled = true;
+            }
+        }
+
+        /**
+         * NEW: จัดการการเรียก LLM เพื่อสร้างความขัดแย้ง
+         */
+        async function handleConflictGeneration() {
+            if (isStreaming) return;
+
+            const trimmedKey = checkGeminiKey();
+            if (!trimmedKey) return;
+
+            const userPrompt = "✨ สร้าง 3 ความขัดแย้ง ✨";
+            addMessageToUI('user', userPrompt);
+            showLoading(true);
+
+            // Use context from chat history AND notes
+            const notes = notesTextarea.value;
+            const conflictPrompt = CONFLICT_GENERATOR_PROMPT(notes);
+
+            // Construct payload
+            const apiHistory = chatHistory.slice(-10);
+            const payload = {
+                contents: [
+                    ...apiHistory,
+                    // Add the special conflict prompt
+                    {
+                        role: 'user',
+                        parts: [{
+                            text: conflictPrompt
+                        }]
+                    }
+                ],
+                systemInstruction: {
+                    parts: [{
+                        text: SYSTEM_PROMPT
+                    }]
+                },
+            };
+
+            const DYNAMIC_API_URL = GEMINI_API_URL_BASE + trimmedKey;
+
+            try {
+                const result = await fetchWithRetry(DYNAMIC_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (text) {
+                    chatHistory.push({
+                        role: 'model',
+                        parts: [{
+                            text: text
+                        }]
+                    });
+                    const bubble = addMessageToUI('ai', '');
+                    startStreaming(text, bubble);
+                    ttsBtn.disabled = false;
+                } else {
+                    addMessageToUI('ai', `[ERROR: สร้างความขัดแย้งไม่สำเร็จ]`);
+                }
+            } catch (error) {
+                console.error("Error calling Conflict Generator API:", error);
+                addMessageToUI('ai', `[ERROR: Conflict Generator Failed] ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        /**
+         * NEW: จัดการการเรียก LLM พร้อม Google Search Grounding
+         */
+        async function handleGroundingSearch(userQuery) {
+            if (isStreaming) return;
+
+            const trimmedKey = checkGeminiKey();
+            if (!trimmedKey) return;
+
+            addMessageToUI('user', `${GROUNDING_PREFIX} ${userQuery}`);
+            showLoading(true);
+
+            const payload = {
+                contents: [{
+                    parts: [{
+                        text: userQuery
+                    }]
+                }],
+                tools: [{
+                    "google_search": {}
+                }],
+                systemInstruction: {
+                    parts: [{
+                        text: GROUNDING_SYSTEM_PROMPT
+                    }]
+                },
+            };
+
+            const DYNAMIC_API_URL = GEMINI_API_URL_BASE + trimmedKey;
+
+            try {
+                const result = await fetchWithRetry(DYNAMIC_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const candidate = result.candidates?.[0];
+                const text = candidate?.content?.parts?.[0]?.text;
+                let sources = [];
+
+                if (text) {
+                    // Extract sources from grounding metadata
+                    const groundingMetadata = candidate.groundingMetadata;
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({
+                                uri: attribution.web?.uri,
+                                title: attribution.web?.title,
+                            }))
+                            .filter(source => source.uri && source.title);
+                    }
+
+                    // Add to chat history (as a normal model response)
+                    chatHistory.push({
+                        role: 'model',
+                        parts: [{
+                            text: text
+                        }]
+                    });
+
+                    // Add to UI with special formatting
+                    addGroundingResponseToUI(text, sources);
+                    ttsBtn.disabled = false;
+
+                } else {
+                    addMessageToUI('ai', `[ERROR: ไม่พบข้อมูลสรุป]`);
+                    ttsBtn.disabled = true;
+                }
+            } catch (error) {
+                console.error("Error calling Grounding API:", error);
+                addMessageToUI('ai', `[ERROR: ค้นหาข้อมูลไม่สำเร็จ] ${error.message}`);
+                ttsBtn.disabled = true;
+            } finally {
+                showLoading(false);
+            }
+        }
+
+
+        /**
+         * จัดการการเรียก TTS (อ่านข้อความล่าสุด)
+         */
+        async function handleTTSCall() {
+            const lastAiMessage = chatHistory.slice().reverse().find(msg => msg.role === 'model');
+
+            if (!lastAiMessage) {
+                addMessageToUI('ai', 'อ๊ะ! ผมยังไม่มีข้อความล่าสุดที่จะอ่านให้ฟังเลยครับ');
+                return;
+            }
+
+            const textToSpeak = lastAiMessage.parts[0].text;
+            const trimmedKey = checkGeminiKey();
+            if (!trimmedKey) return;
+
+            ttsBtn.disabled = true;
+            ttsBtn.textContent = '🎧 กำลังสร้างเสียง...';
+            stopAudio();
+
+            const DYNAMIC_TTS_URL = TTS_API_URL_BASE + trimmedKey;
+            const payload = {
+                contents: [{
+                    parts: [{
+                        text: `พูดด้วยน้ำเสียงเป็นกันเองและชัดเจน: ${textToSpeak}`
+                    }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: {
+                                voiceName: "Kore"
+                            }
+                        }
+                    }
+                },
+                model: TTS_MODEL_NAME
+            };
+
+            try {
+                const result = await fetchWithRetry(DYNAMIC_TTS_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                    const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
+
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmData);
+                    lastWavBlob = pcmToWav(pcm16, sampleRate);
+
+                    const audioUrl = URL.createObjectURL(lastWavBlob);
+                    audioPlayer.src = audioUrl;
+                    audioPlayer.play();
+
+                    stopAudioBtn.disabled = false;
+                    downloadAudioBtn.disabled = false;
+
+                } else {
+                    throw new Error("Invalid TTS response structure.");
+                }
+
+            } catch (error) {
+                console.error("Error calling TTS API:", error);
+                addMessageToUI('ai', `[ERROR: สร้างเสียงพูดไม่สำเร็จ] ${error.message}`);
+                ttsBtn.disabled = false;
+            }
+        }
+
+        /**
+         * NEW: จัดการการเรียก TTS (อ่านข้อความที่เลือก)
+         */
+        async function handleTTSSelected() {
+            const selectedText = window.getSelection().toString().trim();
+            if (!selectedText) {
+                addMessageToUI('ai', 'คุณยังไม่ได้เลือกข้อความเลยครับ ลองลากเมาส์คลุมข้อความที่อยากให้ผมอ่านสิ');
+                return;
+            }
+
+            const trimmedKey = checkGeminiKey();
+            if (!trimmedKey) return;
+
+            ttsSelectedBtn.disabled = true;
+            ttsSelectedBtn.textContent = '🎧 กำลังสร้างเสียง...';
+            stopAudio();
+
+            const DYNAMIC_TTS_URL = TTS_API_URL_BASE + trimmedKey;
+            const payload = {
+                contents: [{
+                    parts: [{
+                        text: `พูดด้วยน้ำเสียงเป็นกันเองและชัดเจน: ${selectedText}`
+                    }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: {
+                                voiceName: "Kore"
+                            }
+                        }
+                    }
+                },
+                model: TTS_MODEL_NAME
+            };
+
+            try {
+                const result = await fetchWithRetry(DYNAMIC_TTS_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                    const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
+
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmData);
+                    lastWavBlob = pcmToWav(pcm16, sampleRate);
+
+                    const audioUrl = URL.createObjectURL(lastWavBlob);
+                    audioPlayer.src = audioUrl;
+                    audioPlayer.play();
+
+                    stopAudioBtn.disabled = false;
+                    downloadAudioBtn.disabled = false;
+                } else {
+                    throw new Error("Invalid TTS response structure for selected text.");
+                }
+            } catch (error) {
+                console.error("Error calling TTS API for selected text:", error);
+                addMessageToUI('ai', `[ERROR: สร้างเสียงพูด (ที่เลือก) ไม่สำเร็จ] ${error.message}`);
+            } finally {
+                ttsSelectedBtn.disabled = false;
+                ttsSelectedBtn.textContent = '🎧 อ่านที่เลือก';
+            }
+        }
+
+        // --- Event Handlers & Initialization ---
+
+        /**
+         * กำหนด Event Listeners และเริ่มต้นการโหลด
+         */
+        function initChat() {
+            loadApiKeys();
+            loadNotes();
+            handleModelChange();
+
+            // Input handling
+            sendButton.addEventListener('click', handleUserInput);
+            userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    handleUserInput();
+                }
+            });
+
+            // Quick Prompts
+            quickPromptContainer.querySelectorAll('.quick-prompt-btn').forEach(button => {
+                button.addEventListener('click', (e) => handleQuickPrompt(e.target.textContent));
+            });
+
+            // Model & API Key Change handlers
+            modelSelector.addEventListener('change', handleModelChange);
+            apiKeyInput.addEventListener('input', saveApiKeys);
+
+            // Modal Handlers
+            showNotesBtn.addEventListener('click', () => notesModal.classList.remove('hidden'));
+            closeModalBtn.addEventListener('click', () => notesModal.classList.add('hidden'));
+            saveNotesBtn.addEventListener('click', saveNotes);
+
+            // New Feature Handlers
+            continuePlotBtn.addEventListener('click', handleContinuePlot);
+            generateConflictBtn.addEventListener('click', handleConflictGeneration); // NEW
+            ttsBtn.addEventListener('click', handleTTSCall);
+            ttsSelectedBtn.addEventListener('click', handleTTSSelected); // NEW
+
+            // Control Button Handlers
+            stopWritingBtn.addEventListener('click', () => stopStreaming(false));
+            stopAudioBtn.addEventListener('click', stopAudio);
+            downloadAudioBtn.addEventListener('click', downloadAudio);
+
+            // Audio Player Listeners
+            audioPlayer.addEventListener('play', () => {
+                ttsBtn.disabled = true;
+                ttsSelectedBtn.disabled = true;
+                stopAudioBtn.disabled = false;
+            });
+
+            audioPlayer.addEventListener('ended', () => {
+                ttsBtn.disabled = false;
+                ttsBtn.textContent = '🎧 ฟังเสียงตอบกลับล่าสุด';
+                ttsSelectedBtn.disabled = false;
+                ttsSelectedBtn.textContent = '🎧 อ่านที่เลือก';
+                stopAudioBtn.disabled = true;
+            });
+
+            audioPlayer.addEventListener('pause', () => {
+                ttsBtn.disabled = false;
+                ttsBtn.textContent = '🎧 ฟังเสียงตอบกลับล่าสุด';
+                ttsSelectedBtn.disabled = false;
+                ttsSelectedBtn.textContent = '🎧 อ่านที่เลือก';
+                stopAudioBtn.disabled = true;
+            });
+        }
+
+        /**
+         * จัดการการส่งข้อความของผู้ใช้
+         */
+        function handleUserInput() {
+            const promptText = userInput.value.trim();
+            if (!promptText) return;
+
+            userInput.value = '';
+
+            // Delegate to the correct handler
+            if (promptText.startsWith(GROUNDING_PREFIX)) {
+                const query = promptText.substring(GROUNDING_PREFIX.length).trim();
+                handleGroundingSearch(query);
+            } else {
+                addMessageToUI('user', promptText);
+                handleLLMCall(promptText);
+            }
+        }
+
+        /**
+         * จัดการการคลิก Quick Prompt
+         */
+        function handleQuickPrompt(promptText) {
+            if (isStreaming) return;
+
+            // Check if it's a grounding query
+            if (promptText.startsWith(GROUNDING_PREFIX)) {
+                const query = promptText.substring(GROUNDING_PREFIX.length).trim();
+                handleGroundingSearch(query);
+            } else {
+                addMessageToUI('user', promptText);
+                handleLLMCall(promptText);
+            }
+        }
+
+        /**
+         * จัดการการคลิก "เขียนต่อ"
+         */
+        function handleContinuePlot() {
+            if (isStreaming) return;
+            const promptText = "เขียนต่อจากนี้";
+            addMessageToUI('user', promptText);
+            handleLLMCall(promptText);
+        }
+
+        /**
+         * อัปเดต UI เมื่อเปลี่ยน Model
+         */
+        function handleModelChange() {
+            const selectedModel = modelSelector.value;
+            apiKeyInput.placeholder = `ใส่ API Key สำหรับ ${modelSelector.options[modelSelector.selectedIndex].text}`;
+            apiKeyInput.value = userApiKeys[selectedModel] || '';
+            apiKeyLink.href = modelApiLinks[selectedModel];
+
+            // [MODIFIED] Disable buttons if not Gemini, as others are not implemented
+            const isGemini = selectedModel === 'gemini';
+            const buttons = [
+                sendButton, continuePlotBtn, generateConflictBtn,
+                ttsBtn, ttsSelectedBtn, stopAudioBtn, downloadAudioBtn,
+                ...quickPromptContainer.querySelectorAll('.quick-prompt-btn')
+            ];
+
+            if (isGemini) {
+                buttons.forEach(btn => btn.disabled = false);
+                // Re-enable TTS button only if there is a last message
+                if (chatHistory.slice().reverse().find(msg => msg.role === 'model')) {
+                    ttsBtn.disabled = false;
+                } else {
+                    ttsBtn.disabled = true;
+                }
+            } else {
+                buttons.forEach(btn => btn.disabled = true);
+                addMessageToUI('ai', `ขออภัยครับ ในไฟล์โค้ดนี้มีการ υλο hóa (implement) เฉพาะ Google Gemini เท่านั้นครับ`);
+            }
+        }
+
+
+        /**
+         * บันทึก API Keys ลงใน object และ localStorage
+         */
+        function saveApiKeys() {
+            const selectedModel = modelSelector.value;
+            userApiKeys[selectedModel] = apiKeyInput.value.trim();
+            try {
+                localStorage.setItem('userApiKeys', JSON.stringify(userApiKeys));
+            } catch (e) {
+                console.warn("Could not save API keys to localStorage:", e);
+            }
+        }
+
+        /**
+         * โหลด API Keys จาก localStorage
+         */
+        function loadApiKeys() {
+            try {
+                const savedKeys = localStorage.getItem('userApiKeys');
+                if (savedKeys) {
+                    userApiKeys = JSON.parse(savedKeys);
+                }
+            } catch (e) {
+                console.warn("Could not load API keys from localStorage:", e);
+            }
+        }
+
+        /**
+         * บันทึก Notes
+         */
+        function saveNotes() {
+            try {
+                localStorage.setItem('characterNotes', notesTextarea.value);
+                notesModal.classList.add('hidden');
+            } catch (e) {
+                console.warn("Could not save notes to localStorage:", e);
+                addMessageToUI('ai', '[ERROR: บันทึกโน้ตไม่สำเร็จ พื้นที่อาจจะเต็ม]');
+            }
+        }
+
+        /**
+         * โหลด Notes
+         */
+        function loadNotes() {
+            try {
+                const savedNotes = localStorage.getItem('characterNotes');
+                if (savedNotes) {
+                    notesTextarea.value = savedNotes;
+                }
+            } catch (e) {
+                console.warn("Could not load notes from localStorage:", e);
+            }
+        }
+
+        /**
+         * หยุดเล่นเสียง
+         */
+        function stopAudio() {
+            if (!audioPlayer.paused) {
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0;
+            }
+            stopAudioBtn.disabled = true;
+            ttsBtn.disabled = false; // Re-enable main TTS btn
+            ttsSelectedBtn.disabled = false; // Re-enable selected TTS btn
+        }
+
+        /**
+         * ดาวน์โหลดไฟล์เสียง
+         */
+        function downloadAudio() {
+            if (!lastWavBlob) {
+                addMessageToUI('ai', 'อ๊ะ! ไม่มีไฟล์เสียงให้ดาวน์โหลดครับ ลองกด "ฟังเสียง" ก่อนนะ');
+                return;
+            }
+            const url = URL.createObjectURL(lastWavBlob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'phu-kan-ngoen-audio.wav';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        // --- เริ่มต้นแอป ---
+        initFirebase();
+    </script>
+</body>
+
+</html>
