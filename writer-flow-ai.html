@@ -546,6 +546,11 @@
                     console.error("Failed to parse Firebase config:", e);
                     loadingOverlay.querySelector('h2').textContent = 'ข้อผิดพลาด';
                     loadingOverlay.querySelector('p').textContent = 'ไม่สามารถโหลดการตั้งค่า Firebase ได้';
+                    
+                    // [MODIFIED] Show app in fallback mode
+                    loadingOverlay.classList.add('hidden');
+                    mainAppContainer.classList.remove('hidden');
+                    
                     initChat(); // Run in non-Firebase mode
                     return;
                 }
@@ -553,6 +558,11 @@
                 console.warn("Firebase config not found. Running in non-Firebase mode.");
                 loadingOverlay.querySelector('h2').textContent = 'โหมดสาธิต';
                 loadingOverlay.querySelector('p').textContent = 'ไม่ได้เชื่อมต่อ Firebase';
+                
+                // [MODIFIED] Add this to hide overlay and show app
+                loadingOverlay.classList.add('hidden');
+                mainAppContainer.classList.remove('hidden');
+
                 // This is the fallback path from the PDF
                 initChat();
                 return;
