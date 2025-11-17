@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Writer AI - ผู้ช่วยนักเขียน</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Inter & Noto Sans Thai for enhanced readability -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Apply Noto Sans Thai as the main font for clarity */
+        body {
+            font-family: 'Noto Sans Thai', 'Inter', sans-serif;
+            line-height: 1.6; /* Improved line height for Thai text */
+        }
+        /* Custom scrollbar for generated content area */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #a78bfa; /* Violet-400 */
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #8b5cf6; /* Violet-500 */
+        }
+        /* Style for loading indicator */
+        .dot {
+            width: 12px;
+            height: 12px;
+            background-color: #8b5cf6; /* Violet-500 */
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 4px;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .dot-2 { animation-delay: -0.32s; }
+        .dot-3 { animation-delay: -0.16s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+        /* Custom gradient for the main button */
+        .btn-primary {
+            background-image: linear-gradient(to right, #6366f1 0%, #a855f7 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-position: right center; /* Shift gradient on hover */
+            box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.4);
+        }
+        /* Style for the emphasized API key card - Now using Indigo/Violet tones */
+        .api-key-card {
+            background-color: #f5f3ff; /* Light Indigo background (Indigo-50) */
+            border: 2px solid #6366f1; /* Indigo border (Indigo-500) */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen p-4 sm:p-10">
+
+    <div id="app" class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-extrabold text-gray-800 tracking-tight">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">
+                    Happy Writer AI
+                </span>
+            </h1>
+            <p class="text-xl text-gray-500 mt-3 font-medium">พลังแห่งการสร้างสรรค์นิยายในมือคุณ</p>
+        </header>
+
+        <!-- Main Content Area: Enhanced Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            
+            <!-- Left Column: Input and Configuration -->
+            <div class="lg:col-span-1 space-y-6">
+                
+                <!-- API Key Input - Highlighted Section (Purple/Indigo) -->
+                <div class="api-key-card p-6 rounded-2xl shadow-xl">
+                    <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center">
+                        <i data-lucide="key" class="w-6 h-6 mr-2 stroke-indigo-700"></i> Gemini API Key 
+                    </h2>
+                    <input type="text" id="apiKeyInput" class="w-full p-3 border-2 border-indigo-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 placeholder:text-indigo-400" placeholder="ใส่ Gemini API Key ของคุณที่นี่">
+                    <p class="text-sm text-indigo-600 mt-3 flex items-start">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 mt-1 mr-2 flex-shrink-0"></i> 
+                        <span class="font-medium">จำเป็นต้องมีคีย์ API เพื่อเรียกใช้โมเดล Gemini และบริการอ่านออกเสียง (TTS)</span>
+                    </p>
+                </div>
+
+                <!-- Story Concept Input -->
+                <div class="bg-white p-6 rounded-2xl shadow-xl border-t-4 border-indigo-500">
+                    <h2 class="text-2xl font-semibold text-indigo-700 mb-4 flex items-center">
+                        <i data-lucide="sparkles" class="w-6 h-6 mr-2 text-indigo-500"></i> 1. แนวคิดหลัก
+                    </h2>
+                    <textarea id="conceptInput" rows="4" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500 transition duration-150 resize-none" placeholder="เช่น: เรื่องราวการผจญภัยของนักล่าสมบัติในโลกที่ล่มสลาย..."></textarea>
+                </div>
+                
+                <!-- Generation Options -->
+                <div class="bg-white p-6 rounded-2xl shadow-xl border-t-4 border-purple-500">
+                    <h2 class="text-2xl font-semibold text-purple-700 mb-4 flex items-center">
+                        <i data-lucide="settings" class="w-6 h-6 mr-2 text-purple-500"></i> 2. ตัวเลือกการสร้าง
+                    </h2>
+                    <div class="space-y-4">
+                        <!-- Genre Selection -->
+                        <div>
+                            <label for="genreSelect" class="block text-sm font-medium text-gray-700">แนวเรื่อง (Genre)</label>
+                            <select id="genreSelect" class="mt-1 block w-full p-3 border border-gray-300 rounded-xl bg-white focus:ring-purple-500 focus:border-purple-500 transition duration-150 appearance-none cursor-pointer" onchange="toggleCustomInput('genreSelect', 'customGenreInput')">
+                                <option value="Sci-Fi">Sci-Fi (วิทยาศาสตร์)</option>
+                                <option value="Fantasy">Fantasy (แฟนตาซี)</option>
+                                <option value="Romance">Romance (โรแมนซ์)</option>
+                                <option value="Thriller">Thriller (ระทึกขวัญ)</option>
+                                <option value="Historical">Historical (อิงประวัติศาสตร์)</option>
+                                <option value="Horror">Horror (สยองขวัญ)</option>
+                                <option value="Mystery">Mystery (ลึกลับ)</option>
+                                <option value="custom">อื่นๆ (กำหนดเอง)...</option>
+                            </select>
+                            <input type="text" id="customGenreInput" placeholder="พิมพ์แนวเรื่องที่ต้องการ..." class="mt-2 hidden w-full p-3 border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500" disabled>
+                        </div>
+                        
+                        <!-- Tone Selection -->
+                        <div>
+                            <label for="toneSelect" class="block text-sm font-medium text-gray-700">โทนเรื่อง (Tone)</label>
+                            <select id="toneSelect" class="mt-1 block w-full p-3 border border-gray-300 rounded-xl bg-white focus:ring-purple-500 focus:border-purple-500 transition duration-150 appearance-none cursor-pointer" onchange="toggleCustomInput('toneSelect', 'customToneInput')">
+                                <option value="Epic">ยิ่งใหญ่ (Epic)</option>
+                                <option value="Dark">มืดหม่น (Dark)</option>
+                                <option value="Lighthearted">เบาสบาย (Lighthearted)</option>
+                                <option value="Suspenseful">น่าสงสัย (Suspenseful)</option>
+                                <option value="Humorous">ตลกขบขัน (Humorous)</option>
+                                <option value="Philosophical">เชิงปรัชญา (Philosophical)</option>
+                                <option value="custom">อื่นๆ (กำหนดเอง)...</option>
+                            </select>
+                            <input type="text" id="customToneInput" placeholder="พิมพ์โทนเรื่องที่ต้องการ..." class="mt-2 hidden w-full p-3 border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500" disabled>
+                        </div>
+                        
+                        <!-- Action Selection -->
+                        <div>
+                            <label for="actionSelect" class="block text-sm font-medium text-gray-700">สิ่งที่ต้องการให้ AI ทำ</label>
+                            <select id="actionSelect" class="mt-1 block w-full p-3 border border-gray-300 rounded-xl bg-white focus:ring-purple-500 focus:border-purple-500 transition duration-150 appearance-none cursor-pointer" onchange="toggleCustomInput('actionSelect', 'customActionInput')">
+                                <option value="create_synopsis">สร้างเรื่องย่อ (Synopsis)</option>
+                                <option value="write_chapter">เขียนฉาก/บทต่อไป</option>
+                                <option value="develop_character">พัฒนารายละเอียดตัวละคร</option>
+                                <option value="brainstorm_plot">ระดมความคิดสำหรับโครงเรื่อง (Plot Brainstorm)</option>
+                                <option value="custom">อื่นๆ (กำหนดเอง)...</option>
+                            </select>
+                            <input type="text" id="customActionInput" placeholder="พิมพ์คำสั่งเฉพาะที่ต้องการให้ AI ทำ..." class="mt-2 hidden w-full p-3 border border-gray-300 rounded-xl focus:ring-purple-500 focus:border-purple-500" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                 <!-- Action Button -->
+                <button id="generateButton" class="w-full btn-primary text-white p-4 rounded-xl font-extrabold text-lg shadow-xl hover:shadow-2xl flex items-center justify-center disabled:opacity-60 disabled:shadow-none" onclick="generateContent()">
+                    <i data-lucide="wand-2" class="w-6 h-6 mr-3"></i> 3. สร้างสรรค์เนื้อหา
+                </button>
+            </div>
+
+            <!-- Right Column: Output and History -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- Generated Content Output - BORDER UPDATED TO PURPLE-500 -->
+                <div class="bg-white p-8 rounded-2xl shadow-2xl border-4 border-purple-500 min-h-[500px] relative flex flex-col">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i data-lucide="book-open-text" class="w-7 h-7 mr-3 text-indigo-500"></i> ผลลัพธ์จาก Happy Writer
+                    </h2>
+                    
+                    <div id="loadingIndicator" class="hidden text-center py-20">
+                        <div class="dot"></div>
+                        <div class="dot dot-2"></div>
+                        <div class="dot dot-3"></div>
+                        <p class="mt-4 text-purple-600 font-medium">AI กำลังรังสรรค์... โปรดรอสักครู่</p>
+                    </div>
+
+                    <div id="outputContent" class="custom-scrollbar flex-grow overflow-y-auto text-gray-700 text-lg pr-2 leading-relaxed whitespace-pre-wrap">
+                        <!-- Content will be generated here -->
+                        <p class="text-center text-gray-400 p-10 mt-10">
+                            ป้อนรายละเอียดและกดปุ่มสร้างสรรค์เนื้อหา...<br>
+                            AI พร้อมแล้วที่จะช่วยให้งานเขียนของคุณเป็นไปอย่างสนุกสนาน
+                        </p>
+                    </div>
+
+                    <!-- TTS Controls -->
+                    <div id="ttsControls" class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-100 hidden">
+                        <button id="ttsButton" class="bg-purple-500 text-white px-4 py-2 rounded-xl text-md font-medium hover:bg-purple-600 transition duration-150 disabled:opacity-50 flex items-center shadow-md" onclick="handleTTS()">
+                            <i data-lucide="volume-2" class="w-5 h-5 mr-2"></i> อ่านออกเสียง
+                        </button>
+                        <a id="downloadButton" download="novel_assistant_audio.wav" href="#" class="bg-teal-500 text-white px-4 py-2 rounded-xl text-md font-medium hover:bg-teal-600 transition duration-150 disabled:opacity-50 flex items-center shadow-md opacity-50 pointer-events-none">
+                            <i data-lucide="download" class="w-5 h-5 mr-2"></i> ดาวน์โหลด (.wav)
+                        </a>
+                    </div>
+                    
+                    <audio id="audioPlayer" class="hidden" controls></audio>
+                </div>
+
+                <!-- Debug/Error Message Area -->
+                <div id="messageBox" class="hidden p-4 rounded-xl text-md border-2" role="alert">
+                    <p id="messageText" class="font-semibold"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase and Logic Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // --- Global Canvas Environment Variables ---
+        // The Canvas environment provides the API key automatically if this placeholder is an empty string.
+        let canvasApiKeyPlaceholder = ""; // Used to indicate the spot where Canvas injects the key
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        // Define a safe, minimum default Firebase config for non-Canvas environments
+        const DEFAULT_FIREBASE_CONFIG = {
+            apiKey: "AIzaSy_MOCK_API_KEY", 
+            authDomain: "mock-project.firebaseapp.com",
+            projectId: "mock-project-id", // Fixes the reported error
+            storageBucket: "mock-project.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:mockid"
+        };
+        
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : DEFAULT_FIREBASE_CONFIG;
+        
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // --- Global State for TTS ---
+        let currentAudioBlob = null;
+        let currentAudioUrl = null;
+        const VOICE_NAME = 'Kore'; // Preferred voice for Thai
+
+        // Firebase Initialization
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false;
+        
+        setLogLevel('debug'); // Enable Firestore debug logging
+
+        // --- Utility Functions for Firebase and Auth ---
+
+        async function initializeFirebase() {
+            try {
+                // Initialize app with the dynamic config (or mock config outside Canvas)
+                app = initializeApp(firebaseConfig);
+                
+                // Only attempt to initialize Firestore and Auth if a real projectId is present
+                if (firebaseConfig.projectId && firebaseConfig.projectId !== "mock-project-id") {
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                    
+                    onAuthStateChanged(auth, async (user) => {
+                        if (user) {
+                            userId = user.uid;
+                            isAuthReady = true;
+                            console.log("Authenticated with UID:", userId);
+                        } else {
+                            // Sign in anonymously if no token is provided
+                            try {
+                                if (initialAuthToken) {
+                                    await signInWithCustomToken(auth, initialAuthToken);
+                                } else {
+                                    await signInAnonymously(auth);
+                                }
+                            } catch (error) {
+                                console.error("Firebase authentication failed:", error);
+                                showMessage('error', `การรับรองความถูกต้องล้มเหลว: ${error.message}`);
+                            }
+                        }
+                    });
+                } else {
+                     console.warn("Firebase running in mock mode. Firestore/Auth disabled.");
+                     isAuthReady = true; // Pretend auth is ready for main app logic
+                     userId = 'mock-user-' + Math.random().toString(36).substring(2, 9);
+                }
+
+
+                // Initialize Lucide Icons after the script has loaded and the DOM is ready
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+
+                // Set up audio player event listeners for UI state management
+                const audioPlayer = document.getElementById('audioPlayer');
+                const ttsButton = document.getElementById('ttsButton');
+
+                audioPlayer.onplay = () => {
+                    ttsButton.innerHTML = `<i data-lucide="volume-x" class="w-5 h-5 mr-2"></i> หยุดการเล่น`;
+                    lucide.createIcons();
+                };
+                audioPlayer.onpause = audioPlayer.onended = () => {
+                    ttsButton.innerHTML = `<i data-lucide="volume-2" class="w-5 h-5 mr-2"></i> อ่านออกเสียง`;
+                    lucide.createIcons();
+                };
+
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                showMessage('error', `การเริ่มต้น Firebase ล้มเหลว: ${error.message} หากรันภายนอก Canvas โปรดใส่ Firebase Config ของคุณเอง`);
+            }
+        }
+
+        // --- Utility Functions for UI/Messaging ---
+
+        function showMessage(type, message) {
+            const messageBox = document.getElementById('messageBox');
+            const messageText = document.getElementById('messageText');
+            messageText.innerHTML = message; // Use innerHTML for formatting (bold/link)
+            messageBox.classList.remove('hidden', 'border-red-400', 'bg-red-100', 'text-red-700', 'border-green-400', 'bg-green-100', 'text-green-700');
+            
+            if (type === 'error') {
+                messageBox.classList.add('border-red-400', 'bg-red-100', 'text-red-700');
+            } else if (type === 'success') {
+                messageBox.classList.add('border-green-400', 'bg-green-100', 'text-green-700');
+            }
+            messageBox.classList.remove('hidden');
+        }
+
+        function hideMessage() {
+            document.getElementById('messageBox').classList.add('hidden');
+        }
+
+        function setLoading(isLoading) {
+            const button = document.getElementById('generateButton');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const downloadButton = document.getElementById('downloadButton');
+
+            button.disabled = isLoading;
+            button.innerHTML = isLoading ? '<i data-lucide="loader-2" class="w-6 h-6 mr-3 animate-spin"></i> กำลังสร้าง...' : '<i data-lucide="wand-2" class="w-6 h-6 mr-3"></i> 3. สร้างสรรค์เนื้อหา';
+            lucide.createIcons(); // Re-create icons for button update
+            loadingIndicator.classList.toggle('hidden', !isLoading);
+            
+            document.getElementById('ttsButton').disabled = isLoading;
+            
+            // Only hide ttsControls if we are starting a *new* generation
+            if (isLoading) {
+                document.getElementById('ttsControls').classList.add('hidden');
+                downloadButton.classList.add('opacity-50', 'pointer-events-none'); // Disable download button
+            }
+            document.getElementById('outputContent').classList.toggle('hidden', isLoading);
+        }
+
+        // --- UI Logic for Custom Input ---
+        window.toggleCustomInput = function(selectId, inputId) {
+            const select = document.getElementById(selectId);
+            const input = document.getElementById(inputId);
+            
+            if (select.value === 'custom') {
+                input.classList.remove('hidden');
+                input.disabled = false;
+                input.focus();
+            } else {
+                input.classList.add('hidden');
+                input.disabled = true;
+                input.value = ''; // Clear custom input when switching back
+            }
+        }
+
+
+        // --- Core Gemini API Logic ---
+
+        async function fetchWithRetry(urlBase, options, maxRetries = 3) {
+            // 1. Get the key from the UI input.
+            const inputKey = document.getElementById('apiKeyInput').value.trim();
+            // 2. Determine which key to use: UI input (if present) or the Canvas placeholder ("")
+            const keyToUse = inputKey || canvasApiKeyPlaceholder; 
+            
+            // Ensure the API key parameter is always appended.
+            const fullUrl = `${urlBase}?key=${keyToUse}`; 
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    // Pre-check for empty API key and throw a specific error for the user to fix the UI field
+                    if (keyToUse === "") {
+                        throw new Error("API Key เป็นค่าว่าง! กรุณาใส่ Gemini API Key จริงของคุณในช่องด้านบน");
+                    }
+
+                    const response = await fetch(fullUrl, options);
+                    
+                    if (!response.ok) {
+                        // Improved error handling for 401/403
+                        const status = response.status;
+                        const modelName = urlBase.split('/').pop().split(':')[0];
+                        
+                        if (status === 403 || status === 401) {
+                            throw new Error(`Authorization Failed (HTTP ${status}). ตรวจสอบ: 1) API Key ถูกต้องหรือไม่? 2) API Key ถูกจำกัดสิทธิ์หรือไม่? 3) ได้เปิดใช้งาน API: ${modelName} ใน GCP Console แล้วหรือยัง?`);
+                        }
+                        
+                        // Throw error if response status is not successful
+                        throw new Error(`HTTP error! status: ${status}`);
+                    }
+                    return response;
+                } catch (error) {
+                    console.error(`Fetch attempt ${i + 1} failed:`, error.message);
+                    if (i === maxRetries - 1) {
+                        let errorMessage = error.message;
+                        // Add specific hint for external runners on final failure
+                        if (error.message.includes("HTTP error! status: 403")) {
+                            errorMessage += " (หากรันภายนอก Canvas อาจเกิดจาก: ไม่ได้กำหนดค่า 'apiKey' ในโค้ด หรือสิทธิ์ไม่พอ)";
+                        } else if (error.message.includes("API Key เป็นค่าว่าง!")) {
+                            // This error is already specific, no modification needed
+                        }
+                        throw new Error(`การเรียก API ล้มเหลวหลังจาก ${maxRetries} ครั้ง: ${errorMessage}`);
+                    }
+                    // Exponential backoff
+                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+                }
+            }
+        }
+        
+        async function generateText(prompt) {
+            const apiUrlBase = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent`;
+            
+            const systemPrompt = "คุณคือ 'Happy Writer' AI ผู้ช่วยเขียนนิยายมืออาชีพ ตอบเป็นภาษาไทยเท่านั้น โดยเน้นการสร้างสรรค์เนื้อหานิยายที่น่าติดตาม มีรายละเอียด และสอดคล้องกับแนวคิดที่ผู้ใช้ให้มา การตอบกลับจะต้องเป็นข้อความในรูปแบบนวนิยายหรือเรื่องย่อเท่านั้น โดยไม่มีการแนะนำตัวหรือข้อความอธิบายใดๆ ก่อนหรือหลังเนื้อหาที่สร้างขึ้นมา";
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                tools: [{ "google_search": {} }],
+            };
+
+            const options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            };
+
+            try {
+                const response = await fetchWithRetry(apiUrlBase, options);
+                const result = await response.json();
+                
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text || 'ไม่พบเนื้อหาที่สร้างสรรค์';
+                return text;
+
+            } catch (error) {
+                console.error("Text generation failed:", error);
+                throw new Error(`เกิดข้อผิดพลาดในการสร้างเนื้อหา: ${error.message}`);
+            }
+        }
+
+        // --- TTS Helper Functions ---
+
+        function base64ToArrayBuffer(base64) {
+            // Converts a base64 string to an ArrayBuffer
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcm16, sampleRate) {
+            // Converts 16-bit signed PCM audio data to a standard WAV Blob
+            const numChannels = 1;
+            const bitDepth = 16;
+            const bytesPerSample = bitDepth / 8; // 2 bytes
+            const blockAlign = numChannels * bytesPerSample;
+            const byteRate = sampleRate * blockAlign;
+            const dataLength = pcm16.length * bytesPerSample; // Total bytes of audio data
+            const buffer = new ArrayBuffer(44 + dataLength); // 44 bytes for header + data
+            const view = new DataView(buffer);
+
+            let offset = 0;
+
+            // Utility function to write a 4-char string
+            function writeString(str) {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset++, str.charCodeAt(i));
+                }
+            }
+            
+            // --- RIFF Chunk (bytes 0-11) ---
+            writeString('RIFF'); // 0-3
+            view.setUint32(offset, 36 + dataLength, true); // 4-7 (ChunkSize: 36 bytes for subchunks + audio data length)
+            offset += 4; // offset = 8
+            writeString('WAVE'); // 8-11 (offset = 12)
+            
+            // --- FMT Sub-chunk (bytes 12-35) ---
+            writeString('fmt '); // 12-15 (offset = 16)
+            view.setUint32(offset, 16, true); // 16-19 (Sub-chunk 1 Size: 16 for PCM)
+            offset += 4; // offset = 20
+            view.setUint16(offset, 1, true); // 20-21 (Audio Format: 1 for PCM)
+            offset += 2; // offset = 22
+            view.setUint16(offset, numChannels, true); // 22-23 (Num Channels)
+            offset += 2; // offset = 24
+            view.setUint32(offset, sampleRate, true); // 24-27 (Sample Rate)
+            offset += 4; // offset = 28
+            view.setUint32(offset, byteRate, true); // 28-31 (Byte Rate)
+            offset += 4; // offset = 32
+            view.setUint16(offset, blockAlign, true); // 32-33 (Block Align)
+            offset += 2; // offset = 34
+            view.setUint16(offset, bitDepth, true); // 34-35 (Bit Depth)
+            offset += 2; // offset = 36
+
+            // --- DATA Sub-chunk (bytes 36-43) ---
+            writeString('data'); // 36-39 (offset = 40)
+            view.setUint32(offset, dataLength, true); // 40-43 (Sub-chunk 2 Size: Audio data length)
+            offset += 4; // offset = 44 (Start of audio data)
+
+            // Write PCM data (bytes 44-END)
+            for (let i = 0; i < pcm16.length; i++) {
+                view.setInt16(offset, pcm16[i], true);
+                offset += 2;
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+
+        // --- Core TTS Logic ---
+        async function generateTTS(text, voiceName) {
+            const apiUrlBase = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent`;
+            
+            const payload = {
+                contents: [{
+                    parts: [{ text: text }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: voiceName }
+                        }
+                    }
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+
+            const options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            };
+
+            const ttsButton = document.getElementById('ttsButton');
+            ttsButton.disabled = true;
+            const originalButtonContent = ttsButton.innerHTML;
+            ttsButton.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 mr-2 animate-spin"></i> กำลังสร้างเสียง...`;
+            lucide.createIcons();
+            
+            try {
+                // Use fetchWithRetry, which now handles fetching the key from the UI input
+                const response = await fetchWithRetry(apiUrlBase, options); 
+                const result = await response.json();
+                
+                const part = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData && p.inlineData.mimeType.startsWith("audio/"));
+                
+                if (part && part.inlineData) {
+                    const audioData = part.inlineData.data;
+                    const mimeType = part.inlineData.mimeType;
+
+                    // Extract sample rate from mimeType, e.g., audio/L16;rate=24000
+                    const rateMatch = mimeType.match(/rate=(\d+)/);
+                    if (!rateMatch) throw new Error("Could not determine sample rate from MIME type.");
+                    const sampleRate = parseInt(rateMatch[1], 10);
+                    
+                    // Convert base64 to ArrayBuffer (signed PCM16 data)
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmData);
+
+                    // Convert PCM to WAV Blob
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+
+                    return { audioUrl, wavBlob }; // Return both URL and Blob for play/download
+
+                } else {
+                    throw new Error("ไม่พบข้อมูลเสียงในคำตอบจาก API");
+                }
+            } catch (e) {
+                console.error("TTS generation failed:", e);
+                // The fetchWithRetry function will now throw a more specific error for 403
+                showMessage('error', `การอ่านออกเสียงล้มเหลว: ${e.message}`);
+                
+                return null;
+            } finally {
+                ttsButton.disabled = false;
+                ttsButton.innerHTML = originalButtonContent;
+                lucide.createIcons();
+            }
+        }
+
+        // --- Event Handlers ---
+
+        window.generateContent = async function() {
+            hideMessage();
+            const concept = document.getElementById('conceptInput').value;
+            
+            // Get Genre/Tone, checking for custom input first
+            let genre = document.getElementById('genreSelect').value;
+            if (genre === 'custom') {
+                genre = document.getElementById('customGenreInput').value || 'ไม่ระบุ';
+            }
+            
+            let tone = document.getElementById('toneSelect').value;
+            if (tone === 'custom') {
+                tone = document.getElementById('customToneInput').value || 'ไม่ระบุ';
+            }
+            
+            // Get Action, checking for custom input
+            let action = document.getElementById('actionSelect').value;
+            let customActionText = '';
+
+            if (action === 'custom') {
+                customActionText = document.getElementById('customActionInput').value;
+            }
+
+            const outputContent = document.getElementById('outputContent');
+            outputContent.innerHTML = ''; // Clear previous content
+            
+            // Stop and clear previous audio when new content is generated
+            const audioPlayer = document.getElementById('audioPlayer');
+            const downloadButton = document.getElementById('downloadButton');
+
+            if (audioPlayer.src) {
+                audioPlayer.pause();
+                URL.revokeObjectURL(audioPlayer.src);
+                audioPlayer.src = '';
+            }
+            
+            // Clear global audio state and disable download button
+            if (currentAudioUrl) {
+                URL.revokeObjectURL(currentAudioUrl);
+            }
+            currentAudioBlob = null; 
+            currentAudioUrl = null; 
+            downloadButton.classList.add('opacity-50', 'pointer-events-none');
+            downloadButton.href = '#';
+
+            document.getElementById('ttsControls').classList.add('hidden');
+            
+            if (!concept) {
+                showMessage('error', 'กรุณาป้อนแนวคิดหลักของนิยายก่อนครับ');
+                return;
+            }
+
+            let prompt = '';
+            
+            if (action === 'create_synopsis') {
+                prompt = `ช่วยสร้างเรื่องย่อ (Synopsis) ความยาวประมาณ 1-2 ย่อหน้า สำหรับนิยายแนว '${genre}' ที่มีโทน '${tone}' โดยมีแนวคิดหลักคือ: "${concept}"`;
+            } else if (action === 'write_chapter') {
+                prompt = `ช่วยเขียนฉากแรก หรือบทต่อไป (Chapter/Scene) ความยาวประมาณ 200-300 คำ สำหรับนิยายแนว '${genre}' ที่มีโทน '${tone}' โดยใช้แนวคิดหลักคือ: "${concept}"`;
+            } else if (action === 'develop_character') {
+                prompt = `ช่วยพัฒนารายละเอียดตัวละครหลัก 1 ตัว โดยมีชื่อ, ลักษณะภายนอก, นิสัย, และภูมิหลัง สำหรับนิยายแนว '${genre}' ที่มีโทน '${tone}' โดยใช้แนวคิดหลักคือ: "${concept}"`;
+            } else if (action === 'brainstorm_plot') {
+                prompt = `ช่วยระดมความคิดสำหรับโครงเรื่อง (Plot Brainstorm) โดยเสนอ 3 ไอเดียหลักในการดำเนินเรื่อง พร้อมจุดพลิกผัน สำหรับนิยายแนว '${genre}' ที่มีโทน '${tone}' โดยมีแนวคิดหลักคือ: "${concept}"`;
+            } else if (action === 'custom') {
+                 if (!customActionText || customActionText.trim() === '') {
+                    showMessage('error', 'เมื่อเลือก "อื่นๆ (กำหนดเอง)" กรุณาพิมพ์คำสั่งเฉพาะที่ต้องการให้ AI ทำครับ');
+                    return;
+                }
+                // Construct a flexible prompt for custom actions
+                prompt = `ในฐานะผู้ช่วยเขียนนิยายมืออาชีพ กรุณาดำเนินการตามคำสั่งเฉพาะต่อไปนี้: "${customActionText}" โดยอ้างอิงจากแนวคิดหลักคือ "${concept}", แนวเรื่อง '${genre}' และโทนเรื่อง '${tone}'`;
+            } else {
+                showMessage('error', 'กรุณาเลือกสิ่งที่ต้องการให้ AI ทำ หรือพิมพ์คำสั่งกำหนดเอง');
+                return;
+            }
+            
+            setLoading(true);
+
+            try {
+                const generatedText = await generateText(prompt);
+                outputContent.innerHTML = generatedText;
+                document.getElementById('ttsControls').classList.remove('hidden');
+
+            } catch (error) {
+                // The error message from fetchWithRetry will be displayed here
+                outputContent.innerHTML = `<p class="text-red-500">${error.message}</p>`;
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        // Handles Playing/Pausing and initiates TTS generation if not already generated
+        window.handleTTS = async function() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            const downloadButton = document.getElementById('downloadButton');
+
+            // 1. If currently playing, stop it.
+            if (!audioPlayer.paused && audioPlayer.src === currentAudioUrl) {
+                audioPlayer.pause();
+                return;
+            }
+            
+            // 2. If audio is already generated (and not currently playing/paused but loaded), play it.
+            if (currentAudioUrl && currentAudioBlob) {
+                audioPlayer.src = currentAudioUrl; // Just in case it was cleared/paused
+                audioPlayer.play();
+                return;
+            }
+
+            // 3. If audio needs to be generated (first click)
+            const textToSpeak = document.getElementById('outputContent').textContent.trim();
+            if (!textToSpeak || textToSpeak.includes('ป้อนรายละเอียด')) {
+                showMessage('error', 'ไม่มีเนื้อหาที่สร้างสรรค์เพื่อใช้อ่านออกเสียง');
+                return;
+            }
+
+            try {
+                // Generates the audio and returns the URL and Blob
+                const result = await generateTTS(textToSpeak, VOICE_NAME); 
+                
+                if (result) {
+                    currentAudioUrl = result.audioUrl;
+                    currentAudioBlob = result.wavBlob;
+                    
+                    audioPlayer.src = currentAudioUrl;
+                    audioPlayer.play();
+                    
+                    // Enable download button and set its URL
+                    downloadButton.href = currentAudioUrl;
+                    downloadButton.classList.remove('opacity-50', 'pointer-events-none');
+                    showMessage('success', 'สร้างไฟล์เสียงเรียบร้อยแล้ว! สามารถกดเล่นหรือดาวน์โหลดได้');
+                } else {
+                    // Message shown in generateTTS on failure
+                }
+
+            } catch (error) {
+                console.error("Error in handleTTS:", error);
+                showMessage('error', `การจัดการ TTS ล้มเหลว: ${error.message}`);
+            }
+        }
+        
+        // Initial Firebase/Auth setup
+        initializeFirebase();
+
+    </script>
+</body>
+</html>
