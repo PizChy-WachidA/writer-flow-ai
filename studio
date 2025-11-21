@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✍🏻พู่กันไฟ AI: Ultimate Writer's Studio (Pro)</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Font: Inter & Noto Sans Thai -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <!-- Markdown Parser -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    /* Typography & Transitions */
+    body {
+      font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+      line-height: 1.7;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Result Boxes */
+    .ai-result-box {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 16px;
+      min-height: 60px;
+      position: relative;
+      transition: all 0.3s ease-in-out;
+    }
+    .ai-result-box:hover { border-color: #cbd5e1; }
+
+    /* Markdown Content Styling */
+    .prose h1, .prose h2, .prose h3 { font-weight: 700; margin-top: 1em; margin-bottom: 0.5em; color: #1e293b; }
+    .prose p { margin-bottom: 0.8em; color: #334155; }
+    .prose ul, .prose ol { margin-left: 1.5em; margin-bottom: 0.8em; list-style-type: disc; }
+    .prose strong { color: #0f172a; font-weight: 600; }
+
+    /* Action Buttons */
+    .ai-result-box:hover .action-buttons { opacity: 1; }
+    .action-buttons {
+        position: absolute; top: 10px; right: 10px; display: flex; gap: 5px;
+        opacity: 0.5; transition: opacity 0.2s; z-index: 10;
+    }
+    .action-btn {
+        background-color: white; border: 1px solid #e2e8f0; color: #64748b;
+        padding: 5px 8px; border-radius: 6px; cursor: pointer;
+        font-size: 14px; display: flex; align-items: center; justify-content: center;
+        transition: all 0.2s;
+    }
+    .action-btn:hover { background-color: #f1f5f9; color: #6366f1; transform: scale(1.05); }
+
+    /* Chat Interface */
+    .chat-container { height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
+    .chat-message { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; position: relative; word-wrap: break-word; }
+    .chat-user { align-self: flex-end; background: #6366f1; color: white; border-bottom-right-radius: 2px; }
+    .chat-ai { align-self: flex-start; background: white; border: 1px solid #e2e8f0; color: #334155; border-bottom-left-radius: 2px; }
+    
+    /* Floating Action Buttons */
+    .fab-container { position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 10px; z-index: 50; }
+    .fab-btn {
+        width: 56px; height: 56px; border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        color: white; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); border: none; cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .fab-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5); }
+    .speaking { animation: pulse-red 2s infinite; background: #ef4444 !important; }
+    @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(0,0,0,0); } 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
+    
+    .tooltip { position: absolute; right: 70px; background: #1e293b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; opacity: 0; pointer-events: none; transition: opacity 0.2s; white-space: nowrap; top: 50%; transform: translateY(-50%); }
+    .fab-btn:hover + .tooltip { opacity: 1; }
+    
+    input:focus, textarea:focus, select:focus { outline: none; border-color: #6366f1; ring: 2px; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+    .gradient-text { background-clip: text; -webkit-background-clip: text; color: transparent; background-image: linear-gradient(to right, #4f46e5, #9333ea, #db2777); }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm/50 backdrop-blur-md bg-white/90">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white">
+          <i class="ph-bold ph-pen-nib"></i>
+        </div>
+        <span class="text-lg font-bold text-slate-800">พู่กันไฟ <span class="gradient-text">Ultimate</span></span>
+      </div>
+      <div class="text-xs text-slate-500 font-medium hidden sm:block">
+        Powered by Gemini 2.5 & Imagen 3 ♊
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto p-4 md:p-6 space-y-8 pb-32">
+
+    <!-- 1. Visual Studio (Image/Video) -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="flex border-b border-slate-100">
+            <button id="tab-image" class="flex-1 py-3 px-4 font-semibold text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50/30 flex justify-center gap-2 items-center transition-all">
+                <i class="ph ph-image"></i> สตูดิโอสร้างภาพ
+            </button>
+            <button id="tab-video" class="flex-1 py-3 px-4 font-medium text-slate-500 hover:bg-slate-50 flex justify-center gap-2 items-center transition-all">
+                <i class="ph ph-film-strip"></i> สตูดิโอวิดีโอ (Beta)
+            </button>
+        </div>
+
+        <div class="p-6">
+            <!-- Image Gen -->
+            <div id="content-image-gen" class="block">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="w-full md:w-1/3 space-y-4">
+                         <div>
+                            <label class="text-sm font-semibold text-slate-700 mb-1 block">คำบรรยายภาพ (Prompt)</label>
+                            <textarea id="image-prompt" rows="4" class="w-full p-3 border border-slate-300 rounded-xl text-sm focus:border-indigo-500" placeholder="เช่น: น้องหมาชิวาวาขนสีขาวลายดำ กำลังนั่งมองดาวบนยานอวกาศ..."></textarea>
+                        </div>
+                        <button id="generate-image-btn" class="w-full bg-indigo-600 text-white font-semibold py-2.5 rounded-xl hover:bg-indigo-700 transition-all flex justify-center items-center gap-2 shadow-indigo-200 shadow-lg">
+                            <i class="ph-bold ph-magic-wand"></i> วาดภาพ
+                        </button>
+                    </div>
+                    <div class="w-full md:w-2/3 bg-slate-100 rounded-xl border border-slate-200 min-h-[300px] flex items-center justify-center relative overflow-hidden" id="image-result-area">
+                         <div class="text-center text-slate-400">
+                             <i class="ph ph-image text-4xl mb-2 opacity-50"></i>
+                             <p class="text-sm">ภาพผลลัพธ์จะปรากฏที่นี่</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Video Gen -->
+            <div id="content-video-gen" class="hidden text-center py-12">
+                 <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4"><i class="ph ph-video-camera text-3xl text-slate-400"></i></div>
+                 <h3 class="text-lg font-bold text-slate-700">ฟีเจอร์สร้างวิดีโอกำลังพัฒนา</h3>
+                 <p class="text-slate-500 text-sm">ระบบ Image-to-Video จะเปิดให้ใช้งานเร็วๆ นี้ครับคุณกุ้งเต้น</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. NEW: Creative Studio (Character & Editor) -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+         <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-pink-500 to-rose-500"></div>
+         <div class="flex border-b border-slate-100">
+            <button id="tab-char" class="flex-1 py-3 px-4 font-semibold text-pink-600 border-b-2 border-pink-600 bg-pink-50/30 flex justify-center gap-2 items-center transition-all">
+                <i class="ph ph-chats-circle"></i> คุยกับตัวละคร (Roleplay)
+            </button>
+            <button id="tab-editor" class="flex-1 py-3 px-4 font-medium text-slate-500 hover:bg-slate-50 flex justify-center gap-2 items-center transition-all">
+                <i class="ph ph-article-medium"></i> บรรณาธิการ AI (Editor)
+            </button>
+        </div>
+
+        <div class="p-6">
+            <!-- Character Chat -->
+            <div id="content-char" class="block">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Setup Panel -->
+                    <div class="md:col-span-1 space-y-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="ph-fill ph-user-gear text-pink-500"></i> ตั้งค่าตัวละคร</h3>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-500">ชื่อตัวละคร</label>
+                            <input type="text" id="char-name" class="w-full p-2 border border-slate-300 rounded-lg text-sm" placeholder="เช่น: เชอร์ล็อค โฮล์มส์">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-500">นิสัย / บทบาท</label>
+                            <textarea id="char-desc" rows="4" class="w-full p-2 border border-slate-300 rounded-lg text-sm" placeholder="เช่น: ฉลาดเป็นกรด ปากจัด ชอบสังเกตรายละเอียดเล็กๆ น้อยๆ เย็นชาแต่ใจดีลึกๆ"></textarea>
+                        </div>
+                        
+                        <div class="border-t border-slate-200 pt-4 mt-4">
+                            <label class="text-xs font-semibold text-slate-500 mb-2 block">เสียงพูด (Gemini TTS)</label>
+                            <select id="char-voice" class="w-full p-2 border border-slate-300 rounded-lg text-sm">
+                                <option value="Puck">Puck (ชาย/นุ่มนวล)</option>
+                                <option value="Kore" selected>Kore (หญิง/ผ่อนคลาย)</option>
+                                <option value="Fenrir">Fenrir (ชาย/เข้มขรึม)</option>
+                                <option value="Aoede">Aoede (หญิง/สง่างาม)</option>
+                            </select>
+                        </div>
+
+                        <button id="char-start-btn" class="w-full bg-pink-600 text-white font-semibold py-2 rounded-lg hover:bg-pink-700 text-sm mt-2">เริ่มบทสนทนา</button>
+                    </div>
+                    <!-- Chat Area -->
+                    <div class="md:col-span-2 flex flex-col h-[500px]">
+                         <div id="chat-history" class="chat-container flex-1 mb-4">
+                             <!-- Messages will appear here -->
+                             <div class="text-center text-slate-400 mt-10 text-sm">
+                                 <i class="ph ph-chat-dots text-3xl mb-2 opacity-50"></i>
+                                 <p>ตั้งค่าตัวละครทางซ้าย แล้วกดเริ่มเพื่อคุยได้เลย</p>
+                             </div>
+                         </div>
+                         <div class="flex gap-2">
+                             <input type="text" id="chat-input" class="flex-1 p-3 border border-slate-300 rounded-xl text-sm" placeholder="พิมพ์ข้อความของคุณ..." disabled>
+                             <button id="chat-send-btn" class="bg-slate-800 text-white px-5 rounded-xl hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                 <i class="ph-bold ph-paper-plane-right"></i>
+                             </button>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Editor -->
+            <div id="content-editor" class="hidden">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                         <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="ph-fill ph-read-cv-logo text-emerald-500"></i> ส่งต้นฉบับให้ บ.ก. ตรวจ</h3>
+                         <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">AI จะวิเคราะห์จุดแข็ง/จุดอ่อน</span>
+                    </div>
+                    <textarea id="editor-input" rows="6" class="w-full p-4 border border-slate-300 rounded-xl text-sm leading-relaxed" placeholder="วางเนื้อหานิยาย หรือฉากที่คุณเขียนที่นี่..."></textarea>
+                    <button id="editor-analyze-btn" class="bg-emerald-600 text-white font-semibold py-2.5 px-6 rounded-xl hover:bg-emerald-700 flex items-center gap-2 mx-auto">
+                        <i class="ph-bold ph-magnifying-glass"></i> วิเคราะห์งานเขียน
+                    </button>
+                    <div id="editor-result" class="ai-result-box hidden">
+                        <div class="action-buttons">
+                             <button class="action-btn" onclick="speakContent('editor-result-content')"><i class="ph ph-speaker-high"></i></button>
+                             <button class="action-btn" onclick="copyContent('editor-result-content')"><i class="ph ph-copy"></i></button>
+                        </div>
+                        <div id="editor-result-content" class="prose prose-sm max-w-none"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Text Generators (Plot, Refine, Creative) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Plot -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center gap-2 mb-4 text-sky-600 font-bold"><i class="ph-fill ph-lightbulb text-xl"></i> สร้างพล็อต</div>
+            <input id="plot-input" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm mb-3" placeholder="คีย์เวิร์ด: รักแรก, สืบสวน">
+            <button id="plot-btn" class="w-full bg-sky-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-sky-700">สร้างไอเดีย</button>
+            <div id="plot-result" class="ai-result-box hidden p-4 text-sm">
+                 <div class="action-buttons">
+                     <button class="action-btn" onclick="speakContent('plot-result')"><i class="ph ph-speaker-high"></i></button>
+                 </div>
+            </div>
+        </div>
+
+        <!-- Refine -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center gap-2 mb-4 text-violet-600 font-bold"><i class="ph-fill ph-magic-wand text-xl"></i> เกลาสำนวน</div>
+            <textarea id="refine-input" rows="1" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm mb-3" placeholder="ประโยคที่ต้องการเกลา..."></textarea>
+            <button id="refine-btn" class="w-full bg-violet-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-violet-700">เกลาภาษา</button>
+            <div id="refine-result" class="ai-result-box hidden p-4 text-sm italic font-serif text-slate-700">
+                 <div class="action-buttons">
+                     <button class="action-btn" onclick="speakContent('refine-result')"><i class="ph ph-speaker-high"></i></button>
+                 </div>
+            </div>
+        </div>
+
+         <!-- Marketing -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center gap-2 mb-4 text-rose-600 font-bold"><i class="ph-fill ph-megaphone text-xl"></i> คำโปรย</div>
+            <textarea id="market-input" rows="1" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm mb-3" placeholder="เรื่องย่อ..."></textarea>
+            <button id="market-btn" class="w-full bg-rose-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-rose-700">สร้างคำโปรย</button>
+            <div id="market-result" class="ai-result-box hidden p-4 text-sm">
+                 <div class="action-buttons">
+                     <button class="action-btn" onclick="speakContent('market-result')"><i class="ph ph-speaker-high"></i></button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+  </main>
+
+  <!-- Floating Buttons -->
+  <div class="fab-container">
+      <div class="relative group">
+          <button onclick="speakSelection()" class="fab-btn group-hover:scale-110"><i class="ph-bold ph-read-cv-logo text-2xl"></i></button>
+          <div class="tooltip">อ่านที่เลือก (AI Voice)</div>
+      </div>
+      <div class="relative group">
+          <button id="stop-speak-btn" onclick="stopSpeaking()" class="fab-btn bg-slate-700 hidden hover:bg-red-600"><i class="ph-bold ph-stop text-2xl"></i></button>
+          <div class="tooltip">หยุดอ่าน</div>
+      </div>
+  </div>
+
+  <!-- Logic -->
+  <script type="module">
+    // --- Configuration ---
+    const SYSTEM_PROMPT_WRITER = `คุณคือ "พู่กันไฟ" AI นักเขียนมืออาชีพชาวไทย เชี่ยวชาญด้านงานเขียนทุกประเภท แต่การเขียนนิยายคือส่วนที่ทำออกมาดีกว่ส การใช้ภาษาที่สละสลวย และความคิดสร้างสรรค์`;
+    
+    // --- Utilities ---
+    const apiKey = ""; // Injected by environment
+
+    async function callGemini(prompt, systemPrompt) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    contents: [{parts: [{text: prompt}]}],
+                    systemInstruction: {parts: [{text: systemPrompt}]}
+                })
+            });
+            const data = await res.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "เกิดข้อผิดพลาดทางเทคนิค";
+        } catch (e) { return "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้"; }
+    }
+
+    async function callImagen(prompt) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ instances: [{ prompt: prompt }], parameters: { sampleCount: 1 } })
+            });
+            const data = await res.json();
+            if(data.predictions?.[0]?.bytesBase64Encoded) return `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
+            throw new Error("No Image");
+        } catch (e) { return null; }
+    }
+
+    // --- New: High Quality TTS Function (Gemini 2.5) ---
+    let currentAudio = null;
+
+    async function callGeminiTTS(text, voiceName = "Kore") {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+        const payload = {
+            contents: [{ parts: [{ text: text }] }],
+            generationConfig: {
+                responseModalities: ["AUDIO"],
+                speechConfig: {
+                    voiceConfig: {
+                        prebuiltVoiceConfig: { voiceName: voiceName }
+                    }
+                }
+            }
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            const base64Audio = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+            
+            if (base64Audio) {
+                playPcmAudio(base64Audio);
+            } else {
+                console.error("No audio data returned");
+                // Fallback to browser TTS if AI fails
+                fallbackBrowserTTS(text);
+            }
+        } catch (error) {
+            console.error("TTS Error:", error);
+            fallbackBrowserTTS(text);
+        }
+    }
+
+    function playPcmAudio(base64String) {
+        // Stop previous audio
+        stopSpeaking();
+
+        // Convert base64 to ArrayBuffer
+        const binaryString = atob(base64String);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        // Create WAV header for PCM 24kHz mono (Gemini default)
+        const wavHeader = createWavHeader(bytes.length, 24000, 1, 16);
+        const wavBytes = new Uint8Array(wavHeader.length + bytes.length);
+        wavBytes.set(wavHeader);
+        wavBytes.set(bytes, wavHeader.length);
+
+        const blob = new Blob([wavBytes], { type: 'audio/wav' });
+        const url = URL.createObjectURL(blob);
+        
+        currentAudio = new Audio(url);
+        const stopBtn = document.getElementById('stop-speak-btn');
+        
+        currentAudio.onplay = () => {
+             stopBtn.classList.remove('hidden'); 
+             stopBtn.classList.add('speaking');
+        };
+        currentAudio.onended = () => {
+             stopBtn.classList.add('hidden'); 
+             stopBtn.classList.remove('speaking');
+             URL.revokeObjectURL(url);
+        };
+        
+        // FIX: Handle the promise returned by play() to catch the AbortError
+        const playPromise = currentAudio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                if (error.name === "AbortError") {
+                    // This is expected when a new audio starts before the previous one finishes.
+                    console.warn("Playback aborted (interrupted by stopSpeaking/another play). Handled successfully.");
+                } else {
+                    console.error("Audio playback error:", error);
+                }
+            });
+        }
+    }
+
+    function createWavHeader(dataLength, sampleRate, numChannels, bitsPerSample) {
+        const buffer = new ArrayBuffer(44);
+        const view = new DataView(buffer);
+
+        writeString(view, 0, 'RIFF');
+        view.setUint32(4, 36 + dataLength, true);
+        writeString(view, 8, 'WAVE');
+        writeString(view, 12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true); // PCM
+        view.setUint16(22, numChannels, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * numChannels * (bitsPerSample / 8), true);
+        view.setUint16(32, numChannels * (bitsPerSample / 8), true);
+        view.setUint16(34, bitsPerSample, true);
+        writeString(view, 36, 'data');
+        view.setUint32(40, dataLength, true);
+
+        return new Uint8Array(buffer);
+    }
+
+    function writeString(view, offset, string) {
+        for (let i = 0; i < string.length; i++) {
+            view.setUint8(offset + i, string.charCodeAt(i));
+        }
+    }
+
+    function fallbackBrowserTTS(text) {
+        const synth = window.speechSynthesis;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'th-TH';
+        synth.speak(u);
+    }
+
+    function loading(el, text="กำลังคิด...") {
+        el.classList.remove('hidden');
+        el.innerHTML = `<div class="flex items-center gap-2 text-slate-500 justify-center py-4"><i class="ph ph-spinner animate-spin text-xl"></i> ${text}</div>`;
+    }
+
+    // --- Tab Switching ---
+    const setupTabs = (btn1, btn2, content1, content2, colorClass) => {
+        const activeClass = `border-${colorClass}-600 text-${colorClass}-600 bg-${colorClass}-50/30`.split(' ');
+        const inactiveClass = "text-slate-500 hover:bg-slate-50".split(' ');
+        
+        btn1.addEventListener('click', () => {
+            content1.classList.remove('hidden'); content2.classList.add('hidden');
+            btn1.classList.add(...activeClass); btn1.classList.remove(...inactiveClass);
+            btn2.classList.remove(...activeClass); btn2.classList.add(...inactiveClass);
+        });
+        btn2.addEventListener('click', () => {
+            content2.classList.remove('hidden'); content1.classList.add('hidden');
+            btn2.classList.add(...activeClass); btn2.classList.remove(...inactiveClass);
+            btn1.classList.remove(...activeClass); btn1.classList.add(...inactiveClass);
+        });
+    };
+    setupTabs(document.getElementById('tab-image'), document.getElementById('tab-video'), document.getElementById('content-image-gen'), document.getElementById('content-video-gen'), 'indigo');
+    setupTabs(document.getElementById('tab-char'), document.getElementById('tab-editor'), document.getElementById('content-char'), document.getElementById('content-editor'), 'pink');
+
+    // --- Features ---
+
+    // 1. Image Gen
+    document.getElementById('generate-image-btn').addEventListener('click', async () => {
+        const prompt = document.getElementById('image-prompt').value;
+        if(!prompt) return;
+        const resultArea = document.getElementById('image-result-area');
+        loading(resultArea, "กำลังวาดภาพ...");
+        const imgData = await callImagen(prompt);
+        if(imgData) {
+            resultArea.innerHTML = `<img src="${imgData}" class="h-full w-full object-contain"><a href="${imgData}" download="ai-art.png" class="absolute bottom-4 right-4 bg-white/90 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold shadow hover:bg-white">ดาวน์โหลด</a>`;
+        } else {
+            resultArea.innerHTML = `<div class="text-red-500 flex flex-col items-center"><i class="ph-bold ph-warning text-2xl"></i><p>เกิดข้อผิดพลาด</p></div>`;
+        }
+    });
+
+    // 2. Character Chat (Pro)
+    let charName = "";
+    let charDesc = "";
+    let charVoice = "Kore";
+    const chatHistory = document.getElementById('chat-history');
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send-btn');
+
+    document.getElementById('char-start-btn').addEventListener('click', () => {
+        charName = document.getElementById('char-name').value.trim();
+        charDesc = document.getElementById('char-desc').value.trim();
+        charVoice = document.getElementById('char-voice').value;
+
+        if(!charName || !charDesc) { alert("กรุณาใส่ชื่อและนิสัยตัวละครก่อนครับ"); return; }
+        
+        chatHistory.innerHTML = `<div class="text-centerext-slate-400 text-xs my-4">--- เริ่มต้นบทสนทนากับ ${charName} (Voice: ${charVoice}) ---</div>`;
+        addMessage("ai", `สวัสดี...มาทำไรอ่า? ${charName} เธอมีอะไรให้เราช่วยรึป่าว?`);
+        chatInput.disabled = false; chatSend.disabled = false; chatInput.focus();
+    });
+
+    function addMessage(role, text) {
+        const div = document.createElement('div');
+        div.className = `chat-message ${role === 'user' ? 'chat-user' : 'chat-ai'}`;
+        div.innerText = text;
+        if(role === 'ai') {
+             const spkBtn = document.createElement('button');
+             spkBtn.className = "absolute -bottom-5 right-0 text-slate-400 hover:text-indigo-600";
+             spkBtn.innerHTML = '<i class="ph-bold ph-speaker-high"></i>';
+             spkBtn.onclick = () => callGeminiTTS(text, charVoice);
+             div.appendChild(spkBtn);
+        }
+        chatHistory.appendChild(div);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    async function sendChat() {
+        const text = chatInput.value.trim();
+        if(!text) return;
+        addMessage("user", text);
+        chatInput.value = "";
+        
+        // Add typing indicator
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = "chat-message chat-ai opacity-50";
+        loadingDiv.innerHTML = '<i class="ph ph-dots-three animate-bounce"></i>';
+        chatHistory.appendChild(loadingDiv);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+
+        const systemPrompt = `คุณคือตัวละครชื่อ "${charName}" มีนิสัยและบทบาทคือ "${charDesc}" จงตอบคำถามของผู้ใช้งานโดยสวมบทบาทเป็นตัวละครนี้อย่างสมบูรณ์แบบ ห้ามหลุดคาแรคเตอร์ ใช้ภาษาและน้ำเสียงที่เข้ากับตัวละครที่สุด`;
+        const reply = await callGemini(`ผู้ใช้งานพูดว่า: "${text}" \n(ตอบกลับในฐานะ ${charName})`, systemPrompt);
+        
+        chatHistory.removeChild(loadingDiv);
+        addMessage("ai", reply);
+    }
+
+    chatSend.addEventListener('click', sendChat);
+    chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendChat(); });
+
+
+    // 3. AI Editor
+    document.getElementById('editor-analyze-btn').addEventListener('click', async () => {
+        const text = document.getElementById('editor-input').value;
+        if(!text) return;
+        const resBox = document.getElementById('editor-result');
+        const resContent = document.getElementById('editor-result-content');
+        loading(resBox, "บ.ก. กำลังอ่านงานของคุณ...");
+        
+        const systemPrompt = `คุณคือบรรณาธิการนวนิยายมืออาชีพ หน้าที่ของคุณคือวิจารณ์งานเขียนที่ได้รับอย่างสร้างสรรค์และตรงไปตรงมา กรุณาตอบกลับในรูปแบบ Markdown โดยแบ่งหัวข้อดังนี้:
+        1. **จุดแข็ง (Strengths):** สิ่งที่ทำได้ดีแล้ว
+        2. **จุดที่ควรปรับปรุง (Weaknesses):** จุดที่ยังอ่อนหรือติดขัด
+        3. **คำแนะนำ (Suggestions):** วิธีแก้ปัญหาหรือเทคนิคเพิ่มเติม
+        4. **คะแนนภาพรวม:** (X/10)`;
+        
+        const analysis = await callGemini(text, systemPrompt);
+        resBox.classList.remove('hidden');
+        resBox.innerHTML = `
+             <div class="action-buttons">
+                 <button class="action-btn" onclick="speakContent('editor-result-content')"><i class="ph ph-speaker-high"></i></button>
+                 <button class="action-btn" onclick="copyContent('editor-result-content')"><i class="ph ph-copy"></i></button>
+            </div>
+            <div id="editor-result-content" class="prose prose-sm max-w-none">${marked.parse(analysis)}</div>
+        `;
+    });
+
+    // 4. Simple Generators
+    const bindSimple = (btnId, inputId, resultId, prefix) => {
+        document.getElementById(btnId).addEventListener('click', async () => {
+            const inp = document.getElementById(inputId).value;
+            if(!inp) return;
+            const res = document.getElementById(resultId);
+            loading(res);
+            const text = await callGemini(`${prefix}: ${inp}`, SYSTEM_PROMPT_WRITER);
+            res.classList.remove('hidden');
+            res.innerHTML = `<div class="action-buttons"><button class="action-btn" onclick="speakContent('${resultId}')"><i class="ph ph-speaker-high"></i></button></div>${text.replace(/\n/g, '<br>')}`;
+        });
+    }
+    bindSimple('plot-btn', 'plot-input', 'plot-result', 'สร้างไอเดียพล็อตจากคีย์เวิร์ด');
+    bindSimple('refine-btn', 'refine-input', 'refine-result', 'เกลาประโยคนี้ให้สละสลวย');
+    bindSimple('market-btn', 'market-input', 'market-result', 'เขียนคำโปรยขายขายนิยายจากเรื่องย่อ');
+
+    // --- Global Helpers ---
+    window.stopSpeaking = () => { 
+        if(currentAudio) {
+            currentAudio.pause();
+            // currentAudio = null; // Don't clear here, let playPcmAudio reassign it or let it wait for onended
+        }
+        window.speechSynthesis.cancel();
+        const btn = document.getElementById('stop-speak-btn');
+        btn.classList.add('hidden');
+        btn.classList.remove('speaking');
+    };
+
+    window.speakContent = (id) => {
+        const el = document.getElementById(id);
+        if(el) callGeminiTTS(el.innerText, charVoice); // Use AI Voice
+    };
+    
+    window.speakSelection = () => {
+        const sel = window.getSelection().toString();
+        if(sel) callGeminiTTS(sel, "Puck"); else alert("กรุณาคลุมดำข้อความก่อนครับ");
+    }
+    
+    window.copyContent = (id) => {
+        const el = document.getElementById(id);
+        if(el) {
+            navigator.clipboard.writeText(el.innerText);
+            alert("คัดลอกแล้ว!");
+        }
+    }
+
+  </script>
+</body>
+</html>
