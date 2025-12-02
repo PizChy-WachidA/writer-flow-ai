@@ -67,7 +67,7 @@
     }
     .action-btn:hover { background-color: #f1f5f9; color: #6366f1; transform: scale(1.05); }
 
-    /* Chat Interface */
+    /* Chat Interface (Existing) */
     .chat-container { height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
     .chat-message { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; position: relative; word-wrap: break-word; }
     .chat-user { align-self: flex-end; background: #6366f1; color: white; border-bottom-right-radius: 2px; }
@@ -118,6 +118,51 @@
         color: #ffffff; 
         text-decoration: underline;
     }
+
+    /* --- Styles for Silver Brush AI (New Tool) --- */
+    #silver-brush-ai-section .prompt-block {
+        background-color: #f8fafc;
+        border-left: 5px solid #6366f1;
+        padding: 16px;
+        border-radius: 12px;
+        position: relative;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .chat-bubble-ai-sb {
+        background-color: #f1f5f9;
+        color: #1e293b;
+        border-radius: 20px;
+        padding: 12px 16px;
+        max-width: 80%;
+        align-self: flex-start;
+        word-wrap: break-word;
+        opacity: 0;
+        animation: fadeIn 0.3s forwards;
+        line-height: 1.7;
+    }
+    .chat-bubble-user-sb {
+        background-color: #4f46e5;
+        color: white;
+        border-radius: 20px;
+        padding: 12px 16px;
+        max-width: 80%;
+        align-self: flex-end;
+        word-wrap: break-word;
+        opacity: 0;
+        animation: fadeIn 0.3s forwards;
+        line-height: 1.7;
+    }
+    .loader {
+        border: 4px solid #e2e8f0;
+        border-top: 4px solid #6366f1;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 
@@ -268,7 +313,7 @@
         </div>
     </section>
 
-    <!-- 3. โครงสร้างและแก่นเรื่อง (Structure & Core) -->
+    <!-- 3. Structure & Core -->
     <section class="generator-section bg-white border border-slate-200 space-y-4">
         <h2 class="text-lg font-bold text-slate-700 flex items-center gap-2"><i class="ph-bold ph-tree-structure text-blue-600"></i> โครงสร้างและแก่นเรื่อง (Structure & Core)</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -286,7 +331,7 @@
                 </div>
             </div>
 
-            <!-- Outline Generator (NEW) -->
+            <!-- Outline Generator -->
             <div class="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-100">
                 <div class="flex items-center gap-2 mb-4 text-blue-600 font-bold"><i class="ph-fill ph-list-numbers text-xl"></i> สร้างโครงร่าง (Outline)</div>
                 <input id="outline-input" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm mb-3" placeholder="พล็อตเรื่อง: เด็กหนุ่มตามหาเพชรในป่าอาถรรพ์">
@@ -299,7 +344,7 @@
                 </div>
             </div>
             
-            <!-- World-Building Assistant (NEW) -->
+            <!-- World-Building Assistant -->
             <div class="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-100">
                 <div class="flex items-center gap-2 mb-4 text-indigo-600 font-bold"><i class="ph-fill ph-globe-hemisphere-east text-xl"></i> สร้างโลก (World-Build)</div>
                 <input id="world-input" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm mb-3" placeholder="ระบบเวทมนตร์จากเสียงเพลง หรือ เมืองใต้น้ำ">
@@ -314,12 +359,12 @@
         </div>
     </section>
 
-    <!-- 4. ภาษาและรายละเอียด (Language & Detail) -->
+    <!-- 4. Language & Detail -->
     <section class="generator-section bg-white border border-slate-200 space-y-4">
         <h2 class="text-lg font-bold text-slate-700 flex items-center gap-2"><i class="ph-bold ph-chats-teardrop text-purple-600"></i> ภาษาและรายละเอียด (Language & Detail)</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            <!-- Refine Style (Existing) -->
+            <!-- Refine Style -->
             <div class="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-100">
                 <div class="flex items-center gap-2 mb-4 text-violet-600 font-bold"><i class="ph-fill ph-magic-wand text-xl"></i> เกลาสำนวน (Refine)</div>
                 <textarea id="refine-input" rows="1" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm mb-3" placeholder="ประโยคที่ต้องการเกลา..."></textarea>
@@ -332,7 +377,7 @@
                 </div>
             </div>
 
-            <!-- Nomenclature/Name Generator (NEW) -->
+            <!-- Name Generator -->
             <div class="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-100">
                 <div class="flex items-center gap-2 mb-4 text-fuchsia-600 font-bold"><i class="ph-fill ph-identification-card text-xl"></i> ตั้งชื่อ (Name Gen)</div>
                 <input id="name-input" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm mb-3" placeholder="ธีม: ยุคกลางญี่ปุ่น หรือ ไซไฟ">
@@ -345,7 +390,7 @@
                 </div>
             </div>
             
-             <!-- Dialogue Polisher (NEW) -->
+             <!-- Dialogue Polisher -->
             <div class="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-100">
                 <div class="flex items-center gap-2 mb-4 text-pink-600 font-bold"><i class="ph-fill ph-chat-text text-xl"></i> เกลาบทสนทนา</div>
                 <textarea id="dialogue-input" rows="1" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm mb-3" placeholder="บทพูดที่อยากปรับปรุง..."></textarea>
@@ -360,11 +405,11 @@
         </div>
     </section>
 
-    <!-- 5. Marketing and Sales -->
+    <!-- 5. Marketing -->
     <section class="generator-section bg-white border border-slate-200 space-y-4">
         <h2 class="text-lg font-bold text-slate-700 flex items-center gap-2"><i class="ph-bold ph-megaphone text-red-600"></i> การตลาดและคำโปรย (Marketing)</h2>
         <div class="grid grid-cols-1 md:grid-cols-1">
-             <!-- Marketing (Existing) -->
+             <!-- Marketing -->
             <div class="bg-slate-50 p-5 rounded-xl shadow-sm border border-slate-100">
                 <div class="flex items-center gap-2 mb-4 text-rose-600 font-bold"><i class="ph-fill ph-book-open-text text-xl"></i> สร้างคำโปรย (Blurb)</div>
                 <textarea id="market-input" rows="1" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm mb-3" placeholder="เรื่องย่อ/คอนเซ็ปต์หลัก..."></textarea>
@@ -379,21 +424,51 @@
         </div>
     </section>
 
+    <!-- 6. NEW TOOL: Silver Brush AI (พู่กันเงิน AI) -->
+    <section id="silver-brush-ai-section" class="mt-12 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden relative">
+        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+        <div class="p-6">
+            <h2 class="text-xl font-bold text-indigo-700 flex items-center gap-2 mb-4">
+                <i class="ph-bold ph-pen-nib text-2xl"></i> พู่กันเงิน AI - ผู้ช่วยเขียนนิยายอิสระ
+            </h2>
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 mb-4 h-[400px] overflow-y-auto" id="sb-chat-container">
+                <div class="chat-bubble-ai-sb opacity-100 animate-none">
+                    สวัสดีครับ! ผมคือ **พู่กันเงิน AI** ผู้ช่วยนักเขียนนิยายของคุณ! 👋<br>
+                    พร้อมช่วยคุณปั่นนิยายแล้วครับ (ใช้ API Key จากการตั้งค่าหลัก)
+                </div>
+            </div>
+            
+            <div class="flex flex-col gap-2">
+                <div class="flex gap-2">
+                    <input type="text" id="sb-user-input" class="flex-grow border-gray-300 border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="คุยกับ 'พู่กันเงิน'..." disabled>
+                    <button id="sb-send-button" class="bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50" disabled>
+                        <i class="ph-bold ph-paper-plane-right text-xl"></i>
+                    </button>
+                </div>
+                <!-- Extra Controls for Silver Brush -->
+                <div class="flex gap-2 justify-center mt-2">
+                    <button id="sb-stop-btn" class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full hover:bg-red-200 hidden">หยุดเขียน</button>
+                    <button onclick="clearSilverBrushChat()" class="text-xs bg-slate-200 text-slate-600 px-3 py-1 rounded-full hover:bg-slate-300">ล้างแชท</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
   </main>
 
   <!-- Floating Buttons -->
   <div class="fab-container">
-      <!-- Settings Button (NEW) -->
+      <!-- Settings Button -->
       <div class="relative group">
           <button id="settings-btn" class="fab-btn bg-slate-700 hover:bg-slate-600 group-hover:scale-110"><i class="ph-bold ph-gear-six text-2xl"></i></button>
           <div class="tooltip">ตั้งค่า API Key และเสียงอ่าน</div>
       </div>
-      <!-- Speak Selection Button -->
+      <!-- Speak Button -->
       <div class="relative group">
           <button onclick="speakSelection()" class="fab-btn group-hover:scale-110"><i class="ph-bold ph-read-cv-logo text-2xl"></i></button>
           <div class="tooltip">อ่านที่เลือก (AI Voice)</div>
       </div>
-      <!-- Download Button (NEW) -->
+      <!-- Download Button -->
       <div class="relative group">
           <button id="download-fab-btn" onclick="downloadLastAudio()" class="fab-btn bg-emerald-600 hover:bg-emerald-700 group-hover:scale-110"><i class="ph-bold ph-cloud-arrow-down text-2xl"></i></button>
           <div class="tooltip">ดาวน์โหลดเสียงล่าสุด (.wav)</div>
@@ -405,12 +480,11 @@
       </div>
   </div>
 
-  <!-- API Key Modal (UPDATED) -->
+  <!-- API Key Modal -->
   <div id="api-key-modal" class="modal-overlay">
     <div class="modal-content">
         <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="ph-bold ph-key text-indigo-500"></i> ตั้งค่าระบบ</h2>
         
-        <!-- 1. Gemini API Key Setting -->
         <div class="p-3 bg-indigo-50 rounded-lg border border-indigo-200 mb-4">
             <h3 class="font-bold text-sm text-indigo-700 mb-2">1. Gemini API Key (สำหรับ AI)</h3>
             <p class="text-xs text-indigo-600 mb-2">
@@ -420,7 +494,6 @@
             <div id="modal-status" class="text-xs text-slate-500 mt-2"></div>
         </div>
         
-        <!-- 2. Gemini TTS Voice Selection (UPDATED) -->
         <div class="p-3 bg-slate-100 rounded-lg border border-slate-200 mb-6">
             <h3 class="font-bold text-sm text-slate-700 mb-2 flex items-center gap-1"><i class="ph-fill ph-speaker-low text-slate-500"></i> 2. เสียงอ่านทั่วไป (Gemini TTS)</h3>
             <p class="text-xs text-slate-500 mb-2">เลือกเสียงคุณภาพสูงสำหรับอ่านเนื้อหาในช่องผลลัพธ์</p>
@@ -435,7 +508,6 @@
             <p id="tts-status" class="text-xs text-slate-500 mt-2">คุณภาพเสียงจะขึ้นอยู่กับความยาวของข้อความ</p>
         </div>
 
-
         <div class="flex justify-end gap-3">
             <button id="close-modal-btn" class="bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-300 transition-colors">ปิด</button>
             <button id="save-api-key-btn" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors">บันทึกและเริ่มต้น</button>
@@ -443,62 +515,34 @@
     </div>
   </div>
 
-<!-- ************************************ -->
-<!-- ส่วนท้ายเว็บไซต์ (Footer Section) เริ่มต้น -->
-<!-- ************************************ -->
+<!-- Footer -->
 <footer class="bg-slate-900 text-gray-300 py-10 md:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-8 md:space-y-0">
-            
-            <!-- คอลัมน์ด้านซ้าย: ชื่อเว็บไซต์และลิขสิทธิ์ -->
             <div class="text-center md:text-left">
-                <h2 class="text-2xl font-extrabold text-white mb-2">
-                    Ultimate Writer Studio
-                </h2>
-                <p class="text-sm">
-                    เครื่องมือขั้นสุดยอดสำหรับนักเขียนและนักพัฒนา
-                </p>
-                <p class="text-xs mt-4 opacity-75">
-                    &copy; 2025 Ultimate Writer Studio. All rights reserved.
-                </p>
+                <h2 class="text-2xl font-extrabold text-white mb-2">Ultimate Writer Studio</h2>
+                <p class="text-sm">เครื่องมือขั้นสุดยอดสำหรับนักเขียนและนักพัฒนา</p>
+                <p class="text-xs mt-4 opacity-75">&copy; 2025 Ultimate Writer Studio. All rights reserved.</p>
             </div>
-
-            <!-- คอลัมน์ด้านขวา: ลิงก์และข้อมูลผู้สร้าง -->
             <div class="flex flex-col sm:flex-row space-y-6 sm:space-y-0 sm:space-x-12 text-center md:text-right">
-                
-                <!-- ส่วนลิงก์ (ตัวอย่าง) -->
                 <div class="space-y-2">
                     <p class="font-semibold text-white uppercase tracking-wider text-sm mb-2">ข้อมูล</p>
                     <a href="#" class="block text-sm text-gray-400 footer-link transition duration-150">นโยบายความเป็นส่วนตัว</a>
                     <a href="#" class="block text-sm text-gray-400 footer-link transition duration-150">ข้อกำหนดการใช้งาน</a>
                     <a href="#" class="block text-sm text-gray-400 footer-link transition duration-150">ติดต่อเรา</a>
                 </div>
-
-                <!-- ส่วนข้อมูลผู้สร้าง -->
                 <div class="space-y-2">
                     <p class="font-semibold text-white uppercase tracking-wider text-sm mb-2">ผู้สร้าง</p>
-                    <p class="text-base font-medium text-amber-300">
-                        กุ้งเต้น วชิดา
-                    </p>
-                    <p class="text-sm text-gray-400">
-                        นักพัฒนาและผู้ดูแลหลัก
-                    </p>
+                    <p class="text-base font-medium text-amber-300">กุ้งเต้น วชิดา</p>
+                    <p class="text-sm text-gray-400">นักพัฒนาและผู้ดูแลหลัก</p>
                 </div>
             </div>
         </div>
-
-        <!-- ส่วนเสริม: แถบแบ่งและข้อมูลเพิ่มเติม -->
         <div class="mt-10 pt-6 border-t border-gray-700 text-center">
-            <p class="text-xs text-gray-500">
-                ออกแบบและพัฒนาด้วยความมุ่งมั่นเพื่อสังคมนักสร้างสรรค์
-            </p>
+            <p class="text-xs text-gray-500">ออกแบบและพัฒนาด้วยความมุ่งมั่นเพื่อสังคมนักสร้างสรรค์</p>
         </div>
-
     </div>
 </footer>
-<!-- ************************************ -->
-<!-- ส่วนท้ายเว็บไซต์ (Footer Section) สิ้นสุด -->
-<!-- ************************************ -->
 
   <!-- Logic -->
   <script type="module">
@@ -506,14 +550,19 @@
     const API_KEY_STORAGE_KEY = 'gemini_api_key';
     const TTS_VOICE_STORAGE_KEY = 'gemini_tts_voice_name'; 
     const SYSTEM_PROMPT_WRITER = `คุณคือ "พู่กันไฟ" AI นักเขียนมืออาชีพชาวไทย เชี่ยวชาญการเขียนนิยาย การใช้ภาษาที่สละสลวย และความคิดสร้างสรรค์`;
+    
+    // Updated Prompt for Silver Brush (Pukkan Nguen AI)
+    const SYSTEM_PROMPT_SILVER_BRUSH = `คุณคือ AI นักเขียนชาวไทยมืออาชีพ นามปากกาของคุณคือ(พู่กันเงิน) ซึ่งใครต่อใครต่างขนานนามคุณว่าอัจฉริยะด้านงานเขียน (ไอเดียเป็นเลิศ) คุณมีประสบการณ์ในด้านการเขียนมากว่า 15 ปี มีผลงานโดดเด่นในด้านงานเขียนประเภทนิยาย คุณมีความสามารถในการเขียนเรื่องราวอันน่าตื่นเต้น สร้างสรรค์ตัวละครที่มีเสน่ห์ และพรรณนาอารมณ์ความรู้สึกของตัวละครได้อย่างลึกซึ้ง คุณเข้าใจโครงสร้างเรื่องราวและจังหวะในการเล่าเรื่อง คุณยังมีความเชี่ยวชาญในการใช้ภาษาไทยได้อย่างดีเยี่ยมและเลือกใช้คำหรือสำนวนที่เหมาะกับตรงกับยุคสมัยของเรื่องนั้นๆซึ่งเป็นจุดแข็งที่ทำให้งานเขียนของคุณครองใจผู้อ่านได้ทุกแนว. ข้อมูลส่วนตัวของคุณ คุณเป็นคนเก่งฉลาดที่มีเสน่ห์ในการพูดคุย ใช้ภาษาที่อารมณ์ดี เย่าหยอก พูดแซว ผู้ใช้งานได้เพื่อให้เกิดความไว้ใจและเชื่อมต่อกันได้ดีในการทำงานร่วมกัน. จุดสำคัญที่คุณต้องรู้คือ คุณจะใช้ภาษาปัจจุบันในการสนทนาโต้ตอบกับนักเขียน ห้ามใช้คำ ท่านผู้เจริญ!, นักเขียนท่าน ในการพูดคุยเพราะคนปัจจุบันไม่ใช้กัน.
+คุณอาจจะถามข้อมูลฉันหรือฉันบอกเล่าสไตล์การเขียนที่ฉันต้องการ เช่น การเล่าเรื่องแบบตรงไปตรงมา, การเล่าเรื่องแบบย้อนอดีต, การเล่าเรื่องแบบมีชั้นเชิง, สนุกตื่นเต้นและน่าติดตาม, ให้ตัวอย่างของบทเขียนที่ดีที่สุดเมื่อฉันต้องการ.`;
+    
     const GEMINI_TTS_MODEL = "gemini-2.5-flash-preview-tts"; 
     
     // --- Global State ---
     let apiKey = '';
     let isApiReady = false;
     let selectedGeminiVoice = 'Pulcherrima'; 
-    let currentAudio = null; // สำหรับ Audio object ที่กำลังเล่น
-    let lastGeneratedWavBlob = null; // **NEW: สำหรับเก็บไฟล์เสียงล่าสุดเพื่อดาวน์โหลด**
+    let currentAudio = null; 
+    let lastGeneratedWavBlob = null; 
     
     // --- API Key Management ---
     function loadApiKey() {
@@ -550,6 +599,10 @@
             
             const charStartBtn = document.getElementById('char-start-btn');
             if (charStartBtn) charStartBtn.disabled = false;
+            
+            // Silver Brush Buttons
+            document.getElementById('sb-user-input').disabled = false;
+            document.getElementById('sb-send-button').disabled = false;
 
         } else {
             isApiReady = false;
@@ -558,6 +611,8 @@
             allButtons.forEach(btn => btn.disabled = true);
             
             document.getElementById('chat-send-btn').disabled = true;
+            document.getElementById('sb-user-input').disabled = true;
+            document.getElementById('sb-send-button').disabled = true;
             
             if (!localStorage.getItem(API_KEY_STORAGE_KEY)) {
                 setTimeout(() => document.getElementById('api-key-modal').style.display = 'flex', 500);
@@ -570,7 +625,7 @@
             'generate-image-btn', 'char-start-btn', 'chat-send-btn', 
             'editor-analyze-btn', 'plot-btn', 'outline-btn', 
             'world-btn', 'refine-btn', 'name-btn', 
-            'dialogue-btn', 'market-btn'
+            'dialogue-btn', 'market-btn', 'sb-send-button'
         ];
         
         buttonsToDisable.forEach(id => {
@@ -579,6 +634,7 @@
         });
         
         document.getElementById('chat-input').disabled = !isApiReady;
+        document.getElementById('sb-user-input').disabled = !isApiReady;
     }
 
 
@@ -707,13 +763,12 @@
                 const mimeType = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.mimeType;
                 
                 if (base64Audio && mimeType && mimeType.startsWith("audio/L16")) {
-                    // Extract sample rate from mimeType if available (default 24000)
                     const rateMatch = mimeType.match(/rate=(\d+)/);
                     const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000; 
                     
                     const wavBlob = pcmToWavBlob(base64Audio, sampleRate);
-                    lastGeneratedWavBlob = wavBlob; // **Save the WAV Blob**
-                    playWavBlob(wavBlob); // Play the generated audio
+                    lastGeneratedWavBlob = wavBlob;
+                    playWavBlob(wavBlob); 
                 } else {
                     console.error("No valid audio data returned or invalid mime type:", mimeType);
                 }
@@ -728,14 +783,12 @@
         console.error("Failed to generate TTS audio after multiple retries.");
     }
 
-    // **NEW FUNCTION: Converts PCM to WAV Blob and returns it**
     function pcmToWavBlob(base64String, sampleRate) {
         const binaryString = atob(base64String);
         const len = binaryString.length;
-        const bytes = new Int16Array(len / 2); // Signed 16-bit PCM
+        const bytes = new Int16Array(len / 2); 
         const byteView = new DataView(bytes.buffer);
         
-        // Convert binary string to Int16Array, handling little-endian format
         for (let i = 0; i < len; i += 2) {
              const lowByte = binaryString.charCodeAt(i);
              const highByte = binaryString.charCodeAt(i + 1);
@@ -743,14 +796,11 @@
         }
         
         const wavHeader = createWavHeader(bytes.byteLength, sampleRate, 1, 16);
-        
-        // Combine header and PCM data
         return new Blob([wavHeader, bytes], { type: 'audio/wav' });
     }
 
-    // **NEW FUNCTION: Plays the WAV Blob**
     function playWavBlob(wavBlob) {
-        stopSpeaking(); // Stop previous audio
+        stopSpeaking(); 
 
         const url = URL.createObjectURL(wavBlob);
         
@@ -784,16 +834,14 @@
         writeString(view, 0, 'RIFF');
         view.setUint32(4, 36 + dataLength, true);
         writeString(view, 8, 'WAVE');
-        
         writeString(view, 12, 'fmt ');
         view.setUint32(16, 16, true);
-        view.setUint16(20, 1, true); // PCM
+        view.setUint16(20, 1, true); 
         view.setUint16(22, numChannels, true);
         view.setUint32(24, sampleRate, true);
-        view.setUint32(28, sampleRate * numChannels * (bitsPerSample / 8), true); // Byte rate
-        view.setUint16(32, numChannels * (bitsPerSample / 8), true); // Block align
+        view.setUint32(28, sampleRate * numChannels * (bitsPerSample / 8), true); 
+        view.setUint16(32, numChannels * (bitsPerSample / 8), true); 
         view.setUint16(34, bitsPerSample, true);
-        
         writeString(view, 36, 'data');
         view.setUint32(40, dataLength, true);
 
@@ -886,7 +934,6 @@
              const spkBtn = document.createElement('button');
              spkBtn.className = "absolute -bottom-5 right-0 text-slate-400 hover:text-pink-600";
              spkBtn.innerHTML = '<i class="ph-bold ph-speaker-high"></i>';
-             // Character chat uses its own specific voice setting
              spkBtn.onclick = () => callGeminiTTS(text, charVoice); 
              div.appendChild(spkBtn);
         }
@@ -900,7 +947,6 @@
         addMessage("user", text);
         chatInput.value = "";
         
-        // Add typing indicator
         const loadingDiv = document.createElement('div');
         loadingDiv.className = "chat-message chat-ai opacity-50";
         loadingDiv.innerHTML = '<i class="ph ph-dots-three animate-bounce"></i>';
@@ -948,7 +994,7 @@
         `;
     });
 
-    // 4. Simple Generators (Expanded)
+    // 4. Simple Generators
     const bindGenerator = (btnId, inputId, resultId, prefix) => {
         document.getElementById(btnId).addEventListener('click', async () => {
             if (!isApiReady) return;
@@ -975,26 +1021,77 @@
         });
     }
 
-    // Structure & Core
     bindGenerator('plot-btn', 'plot-input', 'plot-result', 'สร้างไอเดียพล็อตจากคีย์เวิร์ด');
     bindGenerator('outline-btn', 'outline-input', 'outline-result', 'สร้างโครงร่างบทหรือฉากจากพล็อต');
     bindGenerator('world-btn', 'world-input', 'world-result', 'สร้างรายละเอียดโลก, ระบบเวทมนตร์, หรือสังคมจากคอนเซ็ปต์');
-
-    // Language & Detail
     bindGenerator('refine-btn', 'refine-input', 'refine-result', 'เกลาประโยคนี้ให้สละสลวย');
     bindGenerator('name-btn', 'name-input', 'name-result', 'สร้างชื่อตัวละคร 5 ชื่อ และชื่อสถานที่ 5 ชื่อ ในธีม');
     bindGenerator('dialogue-btn', 'dialogue-input', 'dialogue-result', 'ปรับปรุงบทสนทนานี้ให้ฟังดูเป็นธรรมชาติและเข้ากับโทนเรื่อง');
-
-    // Marketing
     bindGenerator('market-btn', 'market-input', 'market-result', 'เขียนคำโปรยขายขายนิยายจากเรื่องย่อ');
+
+    // --- SILVER BRUSH AI LOGIC (NEW TOOL) ---
+    const sbChatContainer = document.getElementById('sb-chat-container');
+    const sbUserInput = document.getElementById('sb-user-input');
+    const sbSendButton = document.getElementById('sb-send-button');
+    const sbStopBtn = document.getElementById('sb-stop-btn');
+    
+    function addSBMessage(role, text) {
+        const div = document.createElement('div');
+        div.className = role === 'user' ? 'chat-bubble-user-sb' : 'chat-bubble-ai-sb';
+        div.innerHTML = marked.parse(text); // Use markdown for Silver Brush too
+        sbChatContainer.appendChild(div);
+        sbChatContainer.scrollTop = sbChatContainer.scrollHeight;
+    }
+
+    async function sendSBChat() {
+        const text = sbUserInput.value.trim();
+        if(!text || !isApiReady) return;
+        
+        addSBMessage('user', text);
+        sbUserInput.value = "";
+        sbSendButton.disabled = true;
+        sbUserInput.disabled = true;
+        
+        // Typing indicator
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = "chat-bubble-ai-sb opacity-50";
+        loadingDiv.innerHTML = '<div class="loader"></div>';
+        sbChatContainer.appendChild(loadingDiv);
+        sbChatContainer.scrollTop = sbChatContainer.scrollHeight;
+
+        try {
+            const reply = await callGemini(text, SYSTEM_PROMPT_SILVER_BRUSH);
+            sbChatContainer.removeChild(loadingDiv);
+            addSBMessage('ai', reply);
+        } catch (error) {
+            sbChatContainer.removeChild(loadingDiv);
+            addSBMessage('ai', 'เกิดข้อผิดพลาดในการเชื่อมต่อครับ');
+        } finally {
+            sbSendButton.disabled = false;
+            sbUserInput.disabled = false;
+            sbUserInput.focus();
+        }
+    }
+
+    sbSendButton.addEventListener('click', sendSBChat);
+    sbUserInput.addEventListener('keypress', (e) => { 
+        if(e.key === 'Enter' && !sbSendButton.disabled) sendSBChat(); 
+    });
+    
+    window.clearSilverBrushChat = () => {
+        sbChatContainer.innerHTML = `
+            <div class="chat-bubble-ai-sb opacity-100 animate-none">
+                สวัสดีครับ! ผมคือ **พู่กันเงิน AI** ผู้ช่วยนักเขียนนิยายของคุณ! 👋<br>
+                พร้อมช่วยคุณปั่นนิยายแล้วครับ (ใช้ API Key จากการตั้งค่าหลัก)
+            </div>
+        `;
+    };
 
     // --- Modal Logic ---
     document.getElementById('settings-btn').addEventListener('click', () => {
         document.getElementById('api-key-modal').style.display = 'flex';
         document.getElementById('api-key-input').value = '';
         document.getElementById('modal-status').textContent = 'กรุณากรอกคีย์เพื่อบันทึก';
-        
-        // Ensure the current saved voice is selected in the modal
         document.getElementById('gemini-tts-voice').value = selectedGeminiVoice;
     });
     
@@ -1004,18 +1101,11 @@
 
     document.getElementById('save-api-key-btn').addEventListener('click', () => {
         const inputKey = document.getElementById('api-key-input').value.trim();
-        if (inputKey.length > 20) { // Simple validation
+        if (inputKey.length > 20) { 
             saveApiKey(inputKey);
-        } else if (inputKey.length > 0) {
-            document.getElementById('modal-status').textContent = 'รูปแบบคีย์ไม่ถูกต้องหรือไม่ครบถ้วน';
-            document.getElementById('modal-status').className = 'text-xs text-red-500 mb-4 font-semibold';
-            return; 
         }
-
-        // Save the currently selected Gemini TTS voice
         saveGeminiVoice(document.getElementById('gemini-tts-voice').value);
         document.getElementById('api-key-modal').style.display = 'none';
-
     });
     
     // Initialize on load
@@ -1024,7 +1114,6 @@
         selectedGeminiVoice = loadGeminiVoice(); 
         updateApiStatus();
         
-        // Ensure the loaded voice is set in the modal when it opens later
         const voiceSelect = document.getElementById('gemini-tts-voice');
         if (voiceSelect) {
             voiceSelect.value = selectedGeminiVoice;
@@ -1032,14 +1121,13 @@
         }
     }
 
-
-    // --- Global Helpers (UPDATED to use Gemini TTS) ---
+    // --- Global Helpers ---
     window.stopSpeaking = () => { 
         if(currentAudio) {
             currentAudio.pause();
-            currentAudio.currentTime = 0; // Reset
+            currentAudio.currentTime = 0; 
             const url = currentAudio.src;
-            URL.revokeObjectURL(url); // Clean up the Blob URL
+            URL.revokeObjectURL(url); 
             currentAudio = null;
         }
         const btn = document.getElementById('stop-speak-btn');
@@ -1051,11 +1139,10 @@
     window.speakContent = (id) => {
         const el = document.getElementById(id);
         if(el) {
-            // Extract text from the visible content
             const proseContent = el.querySelector('.prose-sm') || el;
             const textToSpeak = proseContent.innerText;
             if (textToSpeak.trim()) {
-                callGeminiTTS(textToSpeak, selectedGeminiVoice); // Use general selected voice
+                callGeminiTTS(textToSpeak, selectedGeminiVoice); 
             }
         }
     };
@@ -1063,7 +1150,7 @@
     window.speakSelection = () => {
         const sel = window.getSelection().toString();
         if(sel) {
-            callGeminiTTS(sel, selectedGeminiVoice); // Use general selected voice
+            callGeminiTTS(sel, selectedGeminiVoice); 
         }
         else {
              const messageBox = document.createElement('div');
@@ -1074,7 +1161,6 @@
         }
     }
     
-    // **NEW FUNCTION: Download Audio**
     window.downloadLastAudio = () => {
         if (!lastGeneratedWavBlob) {
             const messageBox = document.createElement('div');
